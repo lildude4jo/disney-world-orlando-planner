@@ -1,0 +1,1714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Disney World trip planner</title>
+<!-- Created by Avinash -->
+<meta name="theme-color" content="#17202B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="author" content="Avinash">
+<meta name="apple-mobile-web-app-title" content="Disney Planner">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  color-scheme:light dark;
+  --ink:#17202B; --muted:#56616E; --paper:#F2F5F4; --card:#FFFFFF; --line:#D5DCDA;
+  --chg:#8F4300; --chgbg:#FDEFD9; --ver:#1B45B8; --verbg:#E6EDFD;
+  --add:#0B6B45; --addbg:#DDF3E8; --rem:#9B1239; --rembg:#FCE4EA; --call:#5B2A9E; --callbg:#EFE6FB;
+  --onc:#fff;
+}
+.t-ak{--c:#1F7A4D}
+.t-mk1{--c:#3347B8}
+.t-mk2{--c:#A3306F}
+.t-mk{--c:#3347B8}
+.t-ep{--c:#0E7490}
+.t-hs{--c:#B4233B}
+.t-rest{--c:#475569}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#E9EFF1; --muted:#A5B0BA; --paper:#0F1518; --card:#182024; --line:#2B363B;
+    --chg:#FFC27A; --chgbg:#3A2A12; --ver:#9DB7FF; --verbg:#1B2745;
+    --add:#7BE0B1; --addbg:#12342A; --rem:#FF9DB5; --rembg:#3E1623; --call:#CDAEFF; --callbg:#2C1D47;
+    --onc:#0B1210;
+  }
+  .t-ak{--c:#46C08A}
+  .t-mk1{--c:#8C9DFF}
+  .t-mk2{--c:#F083BA}
+  .t-mk{--c:#8C9DFF}
+  .t-ep{--c:#5CC8E0}
+  .t-hs{--c:#FF8DA1}
+  .t-rest{--c:#A8B3C2}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font:16px/1.45 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+
+/* header */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--paper) 92%,transparent);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:800;font-size:16px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-row>div:first-child{min-width:0;flex:1}
+.count{font-size:13px;color:var(--muted)}
+.share{border:1.5px solid var(--ink);background:transparent;border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px}
+.days{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.top-btns{display:flex;gap:8px;flex-wrap:nowrap;justify-content:flex-end}
+.top-btns .share{padding:5px 12px;font-size:14px;white-space:nowrap}
+.day-btn{flex:1 0 86px;border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:8px 6px 9px;text-align:center;line-height:1.1}
+.day-btn .dw{font-size:13px;color:var(--muted);font-weight:600}
+.day-btn .dn{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em;margin:2px 0 3px}
+.day-btn .dp{font-size:12px;font-weight:600}
+.day-btn[aria-pressed=true]{background:var(--c);border-color:var(--c);color:var(--onc)}
+.day-btn[aria-pressed=true] .dw{color:inherit;opacity:.85}
+
+main{padding:18px 16px 8px;max-width:640px;margin:0 auto}
+h1{font-size:30px;line-height:1.05;letter-spacing:-.025em;margin:2px 0 4px;font-weight:800}
+.sub{margin:0;color:var(--muted);font-weight:600}
+.hours{margin:10px 0 0;font-weight:700;color:var(--c)}
+.hours small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+
+.heads{margin:16px 0 22px;padding:12px 14px;list-style:none;border-left:5px solid var(--c);background:var(--card);border-radius:0 12px 12px 0}
+.heads li+li{margin-top:8px}
+.heads li{font-size:15px}
+
+/* timeline */
+.tl{list-style:none;margin:0 0 6px 10px;padding:0;border-left:3px solid var(--line)}
+.blk{position:relative;padding:0 0 20px 20px}
+.blk::before{content:"";position:absolute;left:-9.5px;top:3px;width:16px;height:16px;border-radius:50%;
+  background:var(--paper);border:3px solid var(--muted)}
+.blk.now::before{background:var(--c);border-color:var(--c);box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 25%,transparent)}
+.blk.past::before{border-color:var(--line)}
+.when{font-weight:800;font-size:15px;color:var(--c);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.nowpill{background:var(--c);color:var(--onc);font-size:12px;padding:1px 9px;border-radius:999px}
+.blk h2{margin:1px 0 4px;font-size:19px;letter-spacing:-.01em;font-weight:800}
+.items{list-style:none;margin:0;padding:0}
+.it{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.it:first-child{border-top:0}
+.it input,.it .x{flex:none;width:26px;height:26px;margin:1px 0 0}
+.it input{-webkit-appearance:none;appearance:none;border:2px solid var(--muted);border-radius:8px;background:var(--card);display:grid;place-content:center}
+.it input:checked{background:var(--c);border-color:var(--c)}
+.it input:checked::after{content:"";width:6px;height:12px;border:solid var(--onc);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.it .x{display:grid;place-content:center;color:var(--rem);font-weight:800}
+.it label{display:flex;gap:12px;flex:1;align-items:flex-start}
+.tx{flex:1;min-width:0}
+.ttl{font-weight:600}
+.ico{margin-right:6px}
+.it input:checked ~ .tx .ttl{text-decoration:line-through;color:var(--muted)}
+.it.rm .ttl{text-decoration:line-through;color:var(--muted)}
+.note{margin:3px 0 0;font-size:14px;color:var(--muted)}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+.b-changed{background:var(--chgbg);color:var(--chg)}
+.b-verify{background:var(--verbg);color:var(--ver)}
+.b-added{background:var(--addbg);color:var(--add)}
+.b-removed{background:var(--rembg);color:var(--rem)}
+.b-call{background:var(--callbg);color:var(--call)}
+
+.skip{margin:8px 0 0;padding:14px;border-radius:14px;background:var(--rembg)}
+.skip h2{margin:0 0 6px;font-size:17px;color:var(--rem)}
+.skip ul{margin:0;padding:0;list-style:none}
+.skip li{padding:5px 0;font-size:15px}
+.skip li b{font-weight:800}
+.skip li.gone b{text-decoration:line-through}
+
+/* notes & rules */
+section.sec{margin:0 0 26px}
+section.sec h2{font-size:22px;letter-spacing:-.02em;margin:0 0 4px;font-weight:800}
+section.sec>p{margin:0 0 10px;color:var(--muted);font-size:15px}
+.rows{list-style:none;margin:0;padding:0}
+.rows>li{padding:11px 0;border-top:1px solid var(--line)}
+.rows>li:first-child{border-top:0}
+.rows b{display:block;font-weight:800}
+.rows span{display:block;font-size:15px;color:var(--muted)}
+.rows.chk>li{padding:0}
+.rows.chk label{display:flex;gap:12px;align-items:flex-start;padding:11px 0}
+.rows.chk input{-webkit-appearance:none;appearance:none;flex:none;width:26px;height:26px;border:2px solid var(--muted);border-radius:8px;background:var(--card);display:grid;place-content:center;margin:0}
+.rows.chk input:checked{background:var(--c);border-color:var(--c)}
+.rows.chk input:checked::after{content:"";width:6px;height:12px;border:solid var(--onc);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.rows.chk input:checked + span{text-decoration:line-through}
+.rows.chk span{color:var(--ink);font-size:16px}
+ol.how{margin:0;padding-left:20px}
+ol.how li{margin:6px 0}
+.fine{font-size:13px;color:var(--muted);margin-top:18px}
+
+
+/* wait chips, alternates, buttons, inputs */
+.wt{display:none;margin-left:6px;font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px;vertical-align:1px;white-space:nowrap}
+.wt.on{display:inline-block}
+.w-low{background:var(--addbg);color:var(--add)}
+.w-mid{background:var(--chgbg);color:var(--chg)}
+.w-high{background:var(--rembg);color:var(--rem)}
+.w-off{background:var(--line);color:var(--muted)}
+.b-h{background:var(--line);color:var(--ink)}
+details.more{margin:18px 0 6px;background:var(--card);border-radius:14px;padding:2px 14px}
+details.more summary{font-weight:800;padding:12px 0;cursor:pointer}
+.altlist{list-style:none;margin:0;padding:0}
+.altlist li{padding:10px 0;border-top:1px solid var(--line)}
+.altlist .note{margin-top:2px}
+.alt-t{font-weight:700}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}
+.seg .btn[aria-pressed=true]{background:var(--c);border-color:var(--c);color:var(--onc)}
+.btn{border:1.5px solid var(--ink);background:transparent;border-radius:12px;padding:11px 14px;font-weight:700}
+.btn.pri{background:var(--c);border-color:var(--c);color:var(--onc)}
+.btn.warn{border-color:var(--rem);color:var(--rem)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.inp{width:100%;font:inherit;font-size:16px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);margin:6px 0 10px}
+label.lbl{display:block;font-weight:700;font-size:14px;margin-top:6px}
+.wrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.wrow:first-child{border-top:0}
+.wrow>span:first-child{color:var(--ink);font-size:16px}
+.wrow small{display:block;color:var(--muted);font-size:13px}
+.wrow .wt{display:inline-block;margin:0}
+.mem{padding:12px 0;border-top:1px solid var(--line)}
+.mem:first-child{border-top:0}
+.mem b{font-weight:800}
+.mem .meta{color:var(--muted);font-size:14px}
+.mem.stale .meta{color:var(--rem)}
+.mem a{color:var(--c);font-weight:700}
+.stat{font-size:14px;color:var(--muted);margin:6px 0 0}
+.err{background:var(--rembg);color:var(--rem);padding:10px 12px;border-radius:12px;font-size:14px;margin:10px 0}
+pre.sql{white-space:pre-wrap;word-break:break-word;font:12px/1.4 ui-monospace,Menlo,monospace;background:var(--card);padding:10px;border-radius:10px;max-height:220px;overflow:auto}
+
+
+/* map, walking and ordering notes */
+.map{position:relative;isolation:isolate;height:min(58vh,460px);min-height:300px;border-radius:14px;overflow:hidden;background:var(--card);margin:10px 0}
+.pin span{display:grid;place-content:center;width:28px;height:28px;border-radius:50%;background:var(--c);color:var(--onc);font:800 13px/1 ui-rounded,system-ui,sans-serif;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.legs{list-style:none;margin:0;padding:0}
+.legs li{padding:10px 0;border-top:1px solid var(--line)}
+.legs li:first-child{border-top:0}
+.legs .meta{display:block;color:var(--muted);font-size:14px}
+.walk{font-size:14px;color:var(--muted);margin:-10px 0 14px}
+.whylist{margin:0;padding:0 0 12px 18px}
+.whylist li{margin:8px 0;font-size:15px}
+.b-moved{background:var(--chgbg);color:var(--chg)}
+
+
+/* signature, reminders, filters */
+.catlist .badge{display:inline-block;margin:2px 6px 2px 0}
+.sig{margin:28px 0 6px;text-align:center;font-size:13px;color:var(--muted);letter-spacing:.02em}
+.remind{background:var(--chgbg);color:var(--chg);border-radius:14px;padding:12px 14px;margin:0 0 16px}
+.remind b{display:block;margin-bottom:6px}
+.rline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;color:var(--ink)}
+.rline .btn{padding:6px 12px;border-color:var(--chg);color:var(--chg)}
+.rem{padding:10px 0;border-top:1px solid var(--line)}
+.rem:first-child{border-top:0}
+.remlab{display:flex;gap:12px;align-items:flex-start}
+.remlab input{-webkit-appearance:none;appearance:none;flex:none;width:26px;height:26px;margin:1px 0 0;border:2px solid var(--muted);border-radius:8px;background:var(--card);display:grid;place-content:center}
+.remlab input:checked{background:var(--c);border-color:var(--c)}
+.remlab input:checked::after{content:"";width:6px;height:12px;border:solid var(--onc);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.rem.done .ttl{text-decoration:line-through;color:var(--muted)}
+.rem small{display:block;color:var(--muted);font-size:13px}
+.rbtns{display:flex;gap:18px;margin:4px 0 0 38px}
+.linkbtn{border:0;background:transparent;color:var(--c);font-weight:700;padding:6px 0;text-decoration:underline}
+.linkbtn:last-child{color:var(--rem)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.chipbtn{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px}
+.chipbtn[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.morebox{margin:14px 0 6px;background:var(--card);border-radius:14px;padding:12px 14px}
+textarea.inp{resize:vertical;min-height:110px}
+
+
+/* check-ins, meals and shopping */
+.ckrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.pchip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font-weight:700;font-size:14px;min-height:36px;color:var(--ink)}
+.pchip[aria-pressed=true]{background:var(--c);border-color:var(--c);color:var(--onc)}
+.also{display:block;width:100%;font-size:13px;color:var(--muted);font-weight:500}
+.who{font-size:14px;color:var(--muted);margin:-6px 0 14px}
+.who .linkbtn{padding:0 0 0 4px}
+.meal{padding:12px 0;border-top:1px solid var(--line)}
+.meal:first-of-type{border-top:0}
+.meal .mt{display:block;font-weight:800;color:var(--c);font-size:14px}
+.meal b{display:block;font-weight:800}
+.meal p{margin:2px 0 0;font-size:15px;color:var(--muted)}
+.shoprow{padding:9px 0;border-top:1px solid var(--line)}
+.shoprow:first-child{border-top:0}
+.shoprow small{display:block;color:var(--muted);font-size:13px}
+.stepper{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:8px 0}
+.stepper b{min-width:20px;text-align:center}
+.stepper .btn{padding:4px 14px;font-size:18px}
+.chipbtn.pn{display:inline-flex;gap:8px;align-items:center}
+.xbtn{border:0;background:transparent;font-weight:800;color:var(--rem);padding:0 2px;font-size:14px}
+
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 4px}
+.seg3 .btn{padding:11px 6px;font-size:15px}
+.seg3 .btn[aria-pressed=true]{background:var(--c);border-color:var(--c);color:var(--onc)}
+h3.land{font-size:15px;color:var(--muted);margin:14px 0 2px;font-weight:700}
+
+.snum{display:inline-grid;place-content:center;min-width:22px;height:22px;border-radius:50%;background:var(--c);color:var(--onc);font:800 12px/1 ui-rounded,system-ui,sans-serif;margin-right:6px;vertical-align:1px}
+.approx{color:var(--muted);font-weight:700}
+
+
+/* setup, forms and layout for the generic planner */
+.setup{position:fixed;inset:0;z-index:40;background:var(--paper);overflow:auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom))}
+.setup-in{max-width:560px;margin:0 auto}
+.hint{font-size:13px;color:var(--muted);margin:-4px 0 6px}
+.check{display:flex;gap:12px;align-items:center;margin:16px 0;font-weight:600}
+.check input{width:24px;height:24px;flex:none}
+select.inp{appearance:auto;-webkit-appearance:menulist}
+.seg4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}
+.seg4 .btn{padding:11px 6px}
+.seg4 .btn[aria-pressed=true]{background:var(--c);border-color:var(--c);color:var(--onc)}
+.toast{z-index:60}
+
+/* bottom tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tab{border:0;background:transparent;padding:16px 1px;font-size:14px;font-weight:700;color:var(--muted);border-top:3px solid transparent}
+.tab[aria-current=page]{color:var(--ink);border-top-color:var(--c)}
+
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:9;
+  opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body class="t-ak">
+<header class="top">
+  <div class="top-row">
+    <div>
+      <div class="brand" id="brand">Disney World trip</div>
+      <div class="count" id="count"></div>
+    </div>
+    <div class="top-btns"><button class="share" id="setupbtn" type="button" aria-label="Trip setup">Setup</button><button class="share" id="share" type="button">Share</button></div>
+  </div>
+  <nav class="days" id="days" aria-label="Day"></nav>
+</header>
+<main id="view"></main>
+<nav class="tabs" id="tabs" aria-label="Sections">
+  <button class="tab" data-tab="plan" type="button">Plan</button>
+  <button class="tab" data-tab="map" type="button">Map</button>
+  <button class="tab" data-tab="rides" type="button">Rides</button>
+  <button class="tab" data-tab="group" type="button">Group</button>
+  <button class="tab" data-tab="notes" type="button">Notes</button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="setup" id="setup" hidden></div>
+
+<script>
+/* ---------- config ---------- */
+// Optional: paste your Supabase project URL and publishable key here so every phone starts ready.
+// You can also leave these empty and enter them in the Group tab instead.
+const CONFIG={SUPABASE_URL:"",SUPABASE_KEY:""};
+const API="https://api.themeparks.wiki/v1";
+const LEAFLET="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
+const WALK_MS=1.1, PATH_FACTOR=1.3;   // stroller pace in m/s; real paths run longer than straight lines
+const KNOWLEDGE="Nov 6, 2026";        // when the park facts below were last checked
+
+/* ---------- parks ---------- */
+// open and close are typical hours. Real hours change by date, so each day can be edited.
+const PARKS={
+  mk:{label:"Magic Kingdom",short:"Magic Kingdom",id:"75ea578a-adc8-4116-a54d-dccb60765ef9",re:/magic kingdom/i,cls:"t-mk",open:"09:00",close:"21:00",gate:{lat:28.41620,lng:-81.58130},center:[28.4190,-81.5815,16]},
+  ep:{label:"EPCOT",short:"EPCOT",id:"47f90d2c-e191-4239-a466-5892ef59a88b",re:/epcot/i,cls:"t-ep",open:"09:00",close:"21:00",gate:{lat:28.376550,lng:-81.549394},center:[28.3730,-81.5495,16]},
+  hs:{label:"Hollywood Studios",short:"Hollywood Studios",id:"288747d1-8b4f-4a64-867e-ea7c9b27bad8",re:/hollywood studios/i,cls:"t-hs",open:"09:00",close:"21:00",gate:{lat:28.358442,lng:-81.558686},center:[28.3568,-81.5600,16]},
+  ak:{label:"Animal Kingdom",short:"Animal Kingdom",id:"1c84a229-8862-4648-9c71-378ddd2c7693",re:/animal kingdom/i,cls:"t-ak",open:"08:00",close:"18:00",gate:{lat:28.355139,lng:-81.590069},center:[28.3590,-81.5905,16]}
+};
+
+/* ---------- every ride, show, walk-through and meet ---------- */
+// [name, land, type, min height in, thrill 1-3, priority 1-3, minutes incl. an average line, position, wait-feed words, note, options]
+// Positions: X = from a park GPS list (exact), E = estimated from the park layout (within roughly 50 m).
+// Options: kid = fine for little ones even if thrill 2, ll = Lightning Lane type, c = [from, to, text] closed on those dates,
+// x = closed for good, winter = often closed January to April, reserve = needs a booking, night = nighttime show, noauto = never scheduled.
+const dms=(d,m,s)=>d+m/60+s/3600;
+const X=(a,b)=>[dms(...a),-dms(...b),0];
+const E=(lat,lng)=>[lat,lng,1];
+const RAW={
+mk:[
+ ["Mickey Mouse at Town Square Theater","Main Street, U.S.A.","meet",0,1,2,40,E(28.41665,-81.58090),"town square theater","Mickey in his magician outfit.",{kid:1}],
+ ["Walt Disney World Railroad","Main Street, U.S.A.","ride",0,1,3,25,E(28.41640,-81.58135),"walt disney world railroad","Mostly transport between Main Street and Storybook Circus. Check that it’s running.",{noauto:"It’s transport more than a ride, so it isn’t scheduled. Add it if you like trains."}],
+ ["Jungle Cruise","Adventureland","ride",0,1,2,40,X([28,25,4.68],[81,35,0.61]),"jungle cruise","",{}],
+ ["Pirates of the Caribbean","Adventureland","ride",0,2,3,30,X([28,25,5.08],[81,35,3.55]),"pirates of the caribbean","Dark boat ride with a short drop early on.",{}],
+ ["The Magic Carpets of Aladdin","Adventureland","ride",0,1,3,20,X([28,25,6.36],[81,35,0.54]),"magic carpets of aladdin","Gentle spinner where you control how high your carpet goes.",{kid:1}],
+ ["Walt Disney’s Enchanted Tiki Room","Adventureland","show",0,1,3,20,E(28.41850,-81.58360),"enchanted tiki room","Indoor bird show, about 15 minutes.",{}],
+ ["A Pirate’s Adventure ~ Treasures of the Seven Seas","Adventureland","walk",0,1,3,25,E(28.41820,-81.58400),"pirates adventure","Walk-through adventure.",{}],
+ ["Swiss Family Treehouse","Adventureland","walk",0,1,3,25,E(28.41775,-81.58405),"swiss family treehouse","Stairs and rope bridges. Park the stroller first.",{}],
+ ["Big Thunder Mountain Railroad","Frontierland","ride",40,2,1,50,X([28,25,13.48],[81,35,5.18]),"big thunder mountain","Sources list the minimum as 38 or 40 inches, so check the sign.",{}],
+ ["Tiana’s Bayou Adventure","Frontierland","ride",40,2,1,55,X([28,25,9.08],[81,35,4.58]),"tianas bayou adventure","Log flume. You get wet.",{c:["2026-11-02","2026-12-17","Closed Nov 2 – Dec 17, 2026"]}],
+ ["Country Bear Musical Jamboree","Frontierland","show",0,1,3,25,E(28.41950,-81.58450),"country bear","Indoor show near the Frontierland construction. Check that it’s open.",{}],
+ ["Haunted Mansion","Liberty Square","ride",0,2,2,35,X([28,25,13.65],[81,34,59.25]),"haunted mansion","Spooky themes.",{}],
+ ["The Hall of Presidents","Liberty Square","show",0,1,3,25,E(28.42010,-81.58290),"hall of presidents","Indoor show, air-conditioned.",{}],
+ ["Peter Pan’s Flight","Fantasyland","ride",0,1,1,55,X([28,25,13.13],[81,34,55.11]),"peter pans flight","Waits get long by mid-morning.",{}],
+ ["it’s a small world","Fantasyland","ride",0,1,3,20,X([28,25,13.59],[81,34,55.63]),"its a small world","High capacity and gentle.",{}],
+ ["Mickey’s PhilharMagic","Fantasyland","show",0,1,3,20,E(28.42055,-81.58160),"philharmagic","Indoor 3D show.",{}],
+ ["Prince Charming Regal Carrousel","Fantasyland","ride",0,1,3,15,X([28,25,13.15],[81,34,52.92]),"prince charming regal carrousel","Classic carousel.",{kid:1}],
+ ["The Many Adventures of Winnie the Pooh","Fantasyland","ride",0,1,2,35,X([28,25,12.41],[81,34,48.87]),"many adventures of winnie the pooh","",{}],
+ ["Under the Sea ~ Journey of The Little Mermaid","Fantasyland","ride",0,1,2,30,X([28,25,16.77],[81,34,46.78]),"journey of the little mermaid","",{}],
+ ["Seven Dwarfs Mine Train","Fantasyland","ride",38,2,1,75,[28.42067,-81.58002,0],"seven dwarfs mine train","Family coaster. Lines run long all day.",{kid:1}],
+ ["Mad Tea Party","Fantasyland","ride",0,2,3,20,X([28,25,11.91],[81,34,47.14]),"mad tea party","Fast spinning.",{}],
+ ["the princesses at Princess Fairytale Hall","Fantasyland","meet",0,1,2,40,E(28.41984,-81.58096),"princess fairytale hall","Which princesses are out varies.",{kid:1}],
+ ["Belle at Enchanted Tales with Belle","Fantasyland","meet",0,1,3,30,X([28,25,16.04],[81,34,51.92]),"enchanted tales with belle","A story-driven meet.",{kid:1}],
+ ["Ariel at Ariel’s Grotto","Fantasyland","meet",0,1,3,30,X([28,25,15.23],[81,34,46.61]),"ariels grotto","",{kid:1}],
+ ["Bibbidi Bobbidi Boutique makeover","Fantasyland","exp",0,1,3,90,E(28.42010,-81.58125),"bibbidi bobbidi boutique","For ages 3–12. Needs a reservation, so it isn’t scheduled for you.",{reserve:1}],
+ ["Dumbo the Flying Elephant","Storybook Circus","ride",0,1,2,35,X([28,25,13.16],[81,34,43.85]),"dumbo","",{kid:1}],
+ ["The Barnstormer","Storybook Circus","ride",35,2,2,25,E(28.42070,-81.57860),"barnstormer","Goofy’s junior coaster, about 60 seconds.",{kid:1}],
+ ["Minnie, Daisy, Donald and Goofy at Pete’s Silly Sideshow","Storybook Circus","meet",0,1,3,30,E(28.42010,-81.57850),"petes silly sideshow","Circus-style outfits.",{kid:1}],
+ ["Space Mountain","Tomorrowland","ride",44,3,1,55,X([28,25,7.80],[81,34,41.29]),"space mountain","Dark and rough.",{}],
+ ["TRON Lightcycle / Run","Tomorrowland","ride",48,3,1,70,E(28.41835,-81.57790),"tron lightcycle","Intense launch.",{ll:"single"}],
+ ["Buzz Lightyear’s Space Ranger Spin","Tomorrowland","ride",0,1,2,30,E(28.41900,-81.57960),"buzz lightyears space ranger spin","Leave the joystick alone so it doesn’t spin.",{kid:1}],
+ ["Tomorrowland Transit Authority PeopleMover","Tomorrowland","ride",0,1,3,20,E(28.41885,-81.57990),"peoplemover","Slow, shaded and good for a rest.",{kid:1}],
+ ["Astro Orbiter","Tomorrowland","ride",0,1,3,20,E(28.41860,-81.57940),"astro orbiter","Elevated spinner.",{c:["2027-01-05","2027-01-08","Closed Jan 5–8, 2027"]}],
+ ["Tomorrowland Speedway","Tomorrowland","ride",32,1,3,25,X([28,25,10.05],[81,34,46.05]),"tomorrowland speedway","32 inches to ride with an adult, 54 to drive alone. Loud.",{}],
+ ["Monsters, Inc. Laugh Floor","Tomorrowland","show",0,1,3,25,E(28.41910,-81.57900),"laugh floor","Indoor comedy show.",{}],
+ ["Walt Disney’s Carousel of Progress","Tomorrowland","show",0,1,3,25,E(28.41930,-81.57850),"carousel of progress","",{c:["2026-07-05","2027-06-30","Closed for refurbishment until about mid-2027"]}],
+ ["Happily Ever After fireworks","The hub","show",0,1,2,30,X([28,25,7.56],[81,34,52.27]),"happily ever after","Fireworks and projections. Confirm the time in the app.",{night:1}]
+],
+ep:[
+ ["Guardians of the Galaxy: Cosmic Rewind","World Discovery","ride",42,3,1,70,X([28,22,29.06],[81,32,52.32]),"guardians of the galaxy","Indoor coaster.",{ll:"single"}],
+ ["Test Track","World Discovery","ride",40,3,1,50,X([28,22,23.65],[81,32,51.08]),"test track","Fast car ride.",{}],
+ ["Mission: SPACE","World Discovery","ride",40,3,3,25,X([28,22,26.11],[81,32,50.11]),"mission space","Green mission 40 in, Orange 44 in. Motion simulator.",{}],
+ ["Spaceship Earth","World Celebration","ride",0,1,2,25,X([28,22,31.95],[81,32,57.90]),"spaceship earth","Slow and calm. Check for refurbishment news.",{}],
+ ["Journey Into Imagination with Figment","World Celebration","ride",0,1,3,20,X([28,22,21.72],[81,33,4.31]),"journey into imagination","Slow dark ride. Check for refurbishment news.",{}],
+ ["Soarin’","World Nature","ride",40,2,2,45,X([28,22,25.33],[81,33,8.78]),"soarin","Flying theater. 2026 runs Soarin’ Across America.",{}],
+ ["Living with the Land","World Nature","ride",0,1,3,25,X([28,22,26.19],[81,33,4.62]),"living with the land","Slow boat ride through greenhouses.",{}],
+ ["The Seas with Nemo & Friends","World Nature","ride",0,1,2,30,X([28,22,29.63],[81,33,2.83]),"seas with nemo","Gentle ride and aquarium.",{kid:1}],
+ ["Journey of Water, Inspired by Moana","World Nature","walk",0,1,3,25,E(28.37320,-81.55150),"journey of water","Interactive walk-through.",{kid:1}],
+ ["Frozen Ever After","World Showcase: Norway","ride",0,1,1,50,X([28,22,13.86],[81,32,49.56]),"frozen ever after","Boat ride with a small drop.",{kid:1}],
+ ["Remy’s Ratatouille Adventure","World Showcase: France","ride",0,1,1,55,X([28,22,8.64],[81,33,9.81]),"ratatouille","Trackless dark ride.",{kid:1}],
+ ["Gran Fiesta Tour Starring The Three Caballeros","World Showcase: Mexico","ride",0,1,3,20,X([28,22,17.09],[81,32,51.31]),"gran fiesta tour","Gentle boat ride.",{kid:1}],
+ ["Luminous: The Symphony of Us","World Showcase","show",0,1,2,30,E(28.37190,-81.54940),"luminous","Nighttime show on the lagoon. Confirm the time in the app.",{night:1}]
+],
+hs:[
+ ["Star Wars: Rise of the Resistance","Galaxy’s Edge","ride",40,3,1,75,E(28.35440,-81.56280),"rise of the resistance","Long, immersive ride.",{}],
+ ["Millennium Falcon: Smugglers Run","Galaxy’s Edge","ride",38,2,2,40,E(28.35470,-81.56230),"smugglers run","",{}],
+ ["Slinky Dog Dash","Toy Story Land","ride",38,2,1,70,E(28.35700,-81.56250),"slinky dog dash","Family coaster.",{kid:1}],
+ ["Toy Story Mania!","Toy Story Land","ride",0,1,2,45,X([28,21,22.25],[81,33,39.70]),"toy story mania","Interactive 3D shooting ride.",{kid:1}],
+ ["Alien Swirling Saucers","Toy Story Land","ride",32,2,3,30,E(28.35630,-81.56200),"alien swirling saucers","Spinning ride.",{}],
+ ["Mickey & Minnie’s Runaway Railway","Hollywood Boulevard","ride",0,1,1,55,E(28.35730,-81.56000),"runaway railway","Trackless dark ride.",{kid:1}],
+ ["The Twilight Zone Tower of Terror","Sunset Boulevard","ride",40,3,1,50,X([28,21,35.31],[81,33,35.92]),"tower of terror","Drop ride.",{}],
+ ["Rock ’n’ Roller Coaster Starring The Muppets","Sunset Boulevard","ride",48,3,1,55,E(28.35875,-81.56020),"rock n roller coaster","Launched indoor coaster. Reopened in 2026 with a Muppets theme.",{}],
+ ["Star Tours – The Adventures Continue","Echo Lake","ride",40,2,2,35,X([28,21,19.93],[81,33,32.96]),"star tours","3D motion simulator.",{}],
+ ["Beauty and the Beast – Live on Stage","Hollywood Boulevard","show",0,1,2,40,X([28,21,33.33],[81,33,32.50]),"beauty and the beast","Check showtimes.",{}],
+ ["Indiana Jones Epic Stunt Spectacular!","Echo Lake","show",0,1,3,40,E(28.35630,-81.55840),"indiana jones epic stunt","Check showtimes.",{}],
+ ["Frozen Sing-Along Celebration","Hollywood Boulevard","show",0,1,3,30,E(28.35780,-81.55930),"frozen sing","Check showtimes.",{}],
+ ["Lightning McQueen’s Racing Academy","Animation Courtyard","show",0,1,3,25,E(28.35780,-81.56090),"lightning mcqueen","Check showtimes.",{kid:1}],
+ ["Fantasmic!","Sunset Boulevard","show",0,1,2,35,E(28.35940,-81.56110),"fantasmic","Nighttime show. Arrive early for a seat.",{night:1}]
+],
+ak:[
+ ["Mickey and Minnie at Adventurers Outpost","Discovery Island","meet",0,1,2,40,E(28.35800,-81.59010),"adventurers outpost","Near the bridge to Asia.",{kid:1}],
+ ["Discovery Island Trails","Discovery Island","walk",0,1,3,25,E(28.35700,-81.59150),"","A free walk around the Tree of Life.",{}],
+ ["Avatar Flight of Passage","Pandora – The World of Avatar","ride",44,3,1,75,E(28.35905,-81.59400),"flight of passage","Intense flight simulator.",{ll:"single"}],
+ ["Na’vi River Journey","Pandora – The World of Avatar","ride",0,1,1,50,E(28.35810,-81.59320),"navi river journey","Calm boat ride.",{}],
+ ["Kilimanjaro Safaris","Africa","ride",0,1,1,45,[28.36083,-81.59361,0],"kilimanjaro safaris","Waits are usually lowest at opening, and the animals are most active early.",{}],
+ ["Gorilla Falls Exploration Trail","Africa","walk",0,1,3,35,X([28,21,36.59],[81,35,31.48]),"gorilla falls","",{}],
+ ["Festival of the Lion King","Africa","show",0,1,2,45,E(28.35905,-81.59235),"festival of the lion king","Air-conditioned theater show.",{}],
+ ["Maharajah Jungle Trek","Asia","walk",0,1,3,35,X([28,21,34.46],[81,35,19.04]),"maharajah jungle trek","Tigers, bats and an aviary.",{}],
+ ["Feathered Friends in Flight!","Asia","show",0,1,3,25,X([28,21,32.32],[81,35,23.74]),"feathered friends","Bird show. Check showtimes.",{}],
+ ["Kali River Rapids","Asia","ride",38,2,2,40,X([28,21,33.83],[81,35,17.94]),"kali river rapids","Soaks you.",{winter:1}],
+ ["Expedition Everest","Asia","ride",44,3,1,50,X([28,21,29.49],[81,35,13.72]),"expedition everest","High speed, backward motion.",{}],
+ ["Finding Nemo: The Big Blue... and Beyond!","Back of the park (former DinoLand)","show",0,1,2,45,X([28,21,26.70],[81,35,15.21]),"finding nemo","Indoor stage show. Check showtimes.",{}],
+ ["Wildlife Express Train and Bluey’s Wild World","Conservation Station","exp",0,1,3,75,E(28.35990,-81.59250),"blueys wild world|wildlife express train","For young children. It opened with an app queue, so check the rules.",{reserve:1}],
+ ["Tree of Life Awakenings","Discovery Island","show",0,1,3,20,X([28,21,27.84],[81,35,25.65]),"tree of life awakenings","Projection show from dusk. Seasonal, so check the date.",{night:1}]
+]
+};
+// Closed for good, listed so you know why they aren't in the plan.
+const GONE=[
+ ["mk","Liberty Square Riverboat and Tom Sawyer Island","Liberty Square","Closed for good in July 2025"],
+ ["ak","DinoLand U.S.A. (DINOSAUR, TriceraTop Spin and more)","Closed for good","Closed Feb 1, 2026"],
+ ["hs","Muppet*Vision 3D","Closed for good","Closed for good in 2025"]
+];
+const CATALOG={};
+Object.keys(RAW).forEach(p=>{
+  CATALOG[p]=RAW[p].map(r=>Object.assign({p,n:r[0],l:r[1],t:r[2],h:r[3],th:r[4],pri:r[5],dur:r[6],pos:r[7],q:r[8],d:r[9]},r[10]||{}));
+});
+GONE.forEach(g=>CATALOG[g[0]].push({p:g[0],n:g[1],l:g[2],t:"ride",h:0,th:1,pri:3,dur:0,pos:null,q:"",d:"",x:g[3]}));
+
+// Seasonal touches that only apply on certain dates.
+const OVERLAYS=[
+ {n:"Jungle Cruise",from:"2026-11-03",to:"2027-01-04",note:"The “Jingle Cruise” holiday overlay runs on your date."},
+ {n:"Alien Swirling Saucers",from:"2026-11-04",to:"2027-01-06",note:"It runs a holiday playlist on your date."},
+ {n:"Rock ’n’ Roller Coaster Starring The Muppets",from:"2026-11-04",to:"2027-01-06",note:"It has a holiday overlay on your date."},
+ {n:"Guardians of the Galaxy: Cosmic Rewind",from:"2026-11-25",to:"2027-01-06",note:"It has a holiday remix on your date."}
+];
+
+const RULES=[
+  ["Bag and cooler size","Suitcases, bags, coolers and backpacks must be no larger than 24 × 15 × 18 inches (long × wide × high)."],
+  ["Ice","No loose ice or dry ice in bags or coolers. Use reusable gel ice packs."],
+  ["Glass","No glass containers, except small baby food jars."],
+  ["Straws at Animal Kingdom","Plastic straws are prohibited inside Animal Kingdom for animal safety."],
+  ["Heating and fridges","Park staff can’t heat, refrigerate or process your food."],
+  ["Free ice water","Every quick-service location gives free cups of ice water. Ask for one to fill your bottles."],
+  ["Strollers","Single strollers are for children up to 50 lbs, and double strollers up to 100 lbs. Rented strollers must stay inside the park gates. Check current prices on the official Walt Disney World stroller page."]
+];
+const CHECKS=[
+  "Park hours for each date, including any early closings or special events",
+  "Showtimes for the shows in your plan, plus the nighttime show",
+  "Ride status for your top rides, in the app on the morning of each day",
+  "Lightning Lane bookings, if you bought them",
+  "Character lineups, which rotate",
+  "Weather"
+];
+
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const store={
+  get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const ICON={ride:"🎢",show:"🎭",meet:"⭐",walk:"🚶",tip:"💡",exp:"👑",go:"🚗"};
+const BADGE={moved:"Moved",changed:"Changed",verify:"Verify",added:"Added",removed:"Removed",call:"Your call"};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm=s=>String(s).toLowerCase().replace(/[’'`]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim();
+const slug=s=>norm(s).replace(/ /g,"-");
+const clock=ts=>new Date(ts||Date.now()).toLocaleTimeString([],{hour:"numeric",minute:"2-digit",timeZone:"America/New_York"});
+Object.keys(CATALOG).forEach(k=>CATALOG[k].forEach(e=>{e.id=slug(e.n)}));
+const CK_KINDS=["ride","show","meet","walk","exp"];
+
+function nowET(){
+  const f=new Intl.DateTimeFormat("en-CA",{timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
+  const p=Object.fromEntries(f.formatToParts(new Date()).map(x=>[x.type,x.value]));
+  return {date:p.year+"-"+p.month+"-"+p.day,mins:(+p.hour)*60+(+p.minute)};
+}
+const mins=t=>{const [h,m]=t.split(":").map(Number);return h*60+m};
+const hhmm=m=>{m=Math.max(0,Math.min(1439,Math.round(m)));return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+function fmt(t){const [h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";return ((h+11)%12+1)+":"+String(m).padStart(2,"0")+" "+ap}
+function range(s,e){
+  const a=fmt(s),b=fmt(e);
+  return a.slice(-2)===b.slice(-2)?a.slice(0,-3)+" – "+b:a+" – "+b;
+}
+const dayNum=d=>{const [y,m,dd]=d.split("-").map(Number);return Date.UTC(y,m-1,dd)/864e5};
+const addDays=(d,n)=>{const [y,m,dd]=d.split("-").map(Number);return new Date(Date.UTC(y,m-1,dd+n)).toISOString().slice(0,10)};
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const dowOf=d=>DOW[new Date(d+"T12:00:00Z").getUTCDay()];
+const dnOf=d=>String(+d.slice(8,10));
+const monthDay=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
+const longDate=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",timeZone:"UTC"});
+const inRange=(d,a,b)=>d>=a&&d<=b;
+
+let done=store.get("pdone",{});
+const state={whyOpen:false,pplOpen:false,editOpen:false,cf:"all",editRem:null,tab:store.get("tab","plan"),day:0,seg:0,wp:null};
+if(["meals","rules","waits"].includes(state.tab))state.tab="plan";
+
+
+const SETUP_SQL=`create table if not exists public.locations(
+  code text not null check (length(code) >= 20),
+  member text not null check (length(member) between 1 and 40),
+  lat double precision not null check (lat between -90 and 90),
+  lng double precision not null check (lng between -180 and 180),
+  acc real,
+  updated_at timestamptz not null default now(),
+  primary key (code, member)
+);
+alter table public.locations enable row level security;
+revoke all on public.locations from anon, authenticated;
+
+create or replace function public.share_location(p_code text, p_member text, p_lat double precision, p_lng double precision, p_acc real)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if length(p_code) < 20 then raise exception 'bad code'; end if;
+  delete from public.locations where updated_at < now() - interval '12 hours';
+  insert into public.locations(code, member, lat, lng, acc, updated_at)
+  values (p_code, left(trim(p_member), 40), p_lat, p_lng, p_acc, now())
+  on conflict (code, member) do update
+    set lat = excluded.lat, lng = excluded.lng, acc = excluded.acc, updated_at = now();
+end $$;
+
+create or replace function public.get_locations(p_code text)
+returns table(member text, lat double precision, lng double precision, acc real, updated_at timestamptz)
+language sql security definer set search_path = public stable as $$
+  select member, lat, lng, acc, updated_at from public.locations
+  where code = p_code and length(p_code) >= 20 and updated_at > now() - interval '12 hours';
+$$;
+
+create or replace function public.stop_sharing(p_code text, p_member text)
+returns void language sql security definer set search_path = public as $$
+  delete from public.locations where code = p_code and member = p_member and length(p_code) >= 20;
+$$;
+
+revoke all on function public.share_location(text,text,double precision,double precision,real) from public;
+revoke all on function public.get_locations(text) from public;
+revoke all on function public.stop_sharing(text,text) from public;
+grant execute on function public.share_location(text,text,double precision,double precision,real) to anon;
+grant execute on function public.get_locations(text) to anon;
+grant execute on function public.stop_sharing(text,text) to anon;`;
+
+const SETUP_SQL_2=`create table if not exists public.group_data(
+  code text not null check (length(code) >= 20),
+  kind text not null check (kind in ('ride','person','rem','shop','shopx')),
+  key text not null check (length(key) between 1 and 160),
+  val text not null check (length(val) <= 4000),
+  updated_at timestamptz not null default now(),
+  primary key (code, kind, key)
+);
+alter table public.group_data enable row level security;
+revoke all on public.group_data from anon, authenticated;
+
+create or replace function public.gd_put(p_code text, p_kind text, p_key text, p_val text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if length(p_code) < 20 then raise exception 'bad code'; end if;
+  delete from public.group_data where updated_at < now() - interval '30 days';
+  if (select count(*) from public.group_data where code = p_code) >= 3000
+     and not exists (select 1 from public.group_data where code = p_code and kind = p_kind and key = p_key) then
+    raise exception 'too many rows';
+  end if;
+  insert into public.group_data(code, kind, key, val, updated_at)
+  values (p_code, p_kind, p_key, p_val, now())
+  on conflict (code, kind, key) do update set val = excluded.val, updated_at = now();
+end $$;
+
+create or replace function public.gd_del(p_code text, p_kind text, p_key text)
+returns void language sql security definer set search_path = public as $$
+  delete from public.group_data where code = p_code and kind = p_kind and key = p_key and length(p_code) >= 20;
+$$;
+
+create or replace function public.gd_list(p_code text)
+returns table(kind text, key text, val text, updated_at timestamptz)
+language sql security definer set search_path = public stable as $$
+  select kind, key, val, updated_at from public.group_data where code = p_code and length(p_code) >= 20;
+$$;
+
+revoke all on function public.gd_put(text,text,text,text) from public;
+revoke all on function public.gd_del(text,text,text) from public;
+revoke all on function public.gd_list(text) from public;
+grant execute on function public.gd_put(text,text,text,text) to anon;
+grant execute on function public.gd_del(text,text,text) to anon;
+grant execute on function public.gd_list(text) to anon;`;
+const SETUP_SQL_ALL=SETUP_SQL+"\n\n"+SETUP_SQL_2;
+
+
+/* ---------- live wait times ---------- */
+const waits=store.get("waits",{});   // {ak:{ts,list:[{n,x,t,s,w}]}, mk:{...}}
+const werr={};
+let wBusy=false;
+
+async function getJSON(url){
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),9000);
+  try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}
+  finally{clearTimeout(t)}
+}
+async function loadPark(k){
+  const P=PARKS[k];let j;
+  try{j=await getJSON(API+"/entity/"+P.id+"/live")}
+  catch(e){
+    try{
+      const d=await getJSON(API+"/destinations");
+      const p=(d.destinations||[]).flatMap(x=>x.parks||[]).find(x=>P.re.test(x.name));
+      if(!p)throw e;
+      P.id=p.id;j=await getJSON(API+"/entity/"+p.id+"/live");
+    }catch(e2){throw e}
+  }
+  return (j.liveData||[]).filter(e=>e.entityType==="ATTRACTION"||e.entityType==="SHOW").map(e=>({
+    n:e.name,x:norm(e.name),t:e.entityType,s:e.status,
+    w:e.queue&&e.queue.STANDBY&&e.queue.STANDBY.waitTime!=null?e.queue.STANDBY.waitTime:null
+  }));
+}
+async function refreshWaits(){
+  if(wBusy)return;wBusy=true;
+  await Promise.all(Object.keys(PARKS).map(async k=>{
+    try{waits[k]={ts:Date.now(),list:await loadPark(k)};delete werr[k]}
+    catch(e){werr[k]=e&&e.name==="AbortError"?"The wait-time service timed out.":"Couldn’t reach the wait-time service. You may be offline, or the service may block browsers."}
+  }));
+  store.set("waits",waits);wBusy=false;paint();
+  if(state.tab==="rides")$("#view").innerHTML=ridesHTML();
+}
+const fresh=k=>waits[k]&&Date.now()-waits[k].ts<15*60e3;
+function entryFor(k,q){
+  const w=waits[k];if(!w||!q)return null;
+  for(const part of q.split("|")){const e=w.list.find(x=>x.x.includes(part));if(e)return e}
+  return null;
+}
+function chip(e){
+  if(!e)return null;
+  if(e.s==="OPERATING"){
+    if(e.w==null)return null;
+    return {t:e.w+" min",c:e.w<=20?"w-low":e.w<=45?"w-mid":"w-high"};
+  }
+  return {t:({CLOSED:"Closed",DOWN:"Down",REFURBISHMENT:"Refurb"})[e.s]||String(e.s),c:"w-high"};
+}
+function paint(){
+  document.querySelectorAll(".wt[data-q]").forEach(el=>{
+    const k=el.dataset.p,c=fresh(k)?chip(entryFor(k,el.dataset.q)):null;
+    el.className="wt"+(c?" on "+c.c:"");
+    el.textContent=c?c.t:"";
+  });
+}
+function wtSpan(k,q){return q?'<span class="wt" data-p="'+k+'" data-q="'+q+'"></span>':""}
+
+
+
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("on"),2200)}
+async function shareLink(title,text,url){
+  try{
+    if(navigator.share)await navigator.share({title,text,url});
+    else{await navigator.clipboard.writeText(url);toast("Link copied")}
+  }catch(err){if(err&&err.name!=="AbortError")toast("Couldn’t share. Copy the link from the address bar.")}
+}
+
+
+/* ---------- group location sharing (Supabase) ---------- */
+const G=store.get("grp",{});          // {u,k,code,me,share}
+const gSave=()=>store.set("grp",G);
+const gU=()=>G.u||CONFIG.SUPABASE_URL;
+const gK=()=>G.k||CONFIG.SUPABASE_KEY;
+const okUrl=u=>/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(u||"");
+const rand=n=>{const a=new Uint8Array(n),A="abcdefghjkmnpqrstuvwxyz23456789";crypto.getRandomValues(a);return Array.from(a,b=>A[b%A.length]).join("")};
+const who=m=>String(m).split("~")[0];
+let watch=null,lastPos=null,lastSent=0,rows=[],gErr="",gStat="";
+
+async function rpc(fn,body){
+  const h={"Content-Type":"application/json",apikey:gK()};
+  if(/^eyJ/.test(gK()))h.Authorization="Bearer "+gK();
+  const r=await fetch(gU().replace(/\/$/,"")+"/rest/v1/rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(fn+" "+r.status);
+  const t=await r.text();return t?JSON.parse(t):null;
+}
+function setStat(t){gStat=t;const e=$("#gstat");if(e)e.textContent=t}
+async function send(){
+  if(!lastPos||!G.code||!G.me)return;
+  lastSent=Date.now();
+  try{await rpc("share_location",{p_code:G.code,p_member:G.me,p_lat:lastPos.lat,p_lng:lastPos.lng,p_acc:lastPos.acc});setStat("Sharing. Last sent "+clock()+".");if(state.tab==="group"||state.tab==="map")refreshMembers()}
+  catch(e){setStat("Couldn’t send your location. Will retry.")}
+}
+function onPos(p){
+  lastPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};
+  if(Date.now()-lastSent>=15000)send();
+  if(state.tab==="group")renderMembers();
+}
+function onGeoErr(e){
+  if(e.code===1){setStat("Location is blocked. Allow it in your browser or phone settings, then try again.");stopShare();if(state.tab==="group")render()}
+  else setStat("Still looking for a location fix.");
+}
+function startShare(){
+  if(!navigator.geolocation){toast("This browser can’t share location");return}
+  if(watch!=null)return;
+  G.share=true;gSave();setStat("Waiting for a location fix...");
+  watch=navigator.geolocation.watchPosition(onPos,onGeoErr,{enableHighAccuracy:true,maximumAge:10000,timeout:30000});
+}
+async function stopShare(){
+  if(watch!=null){navigator.geolocation.clearWatch(watch);watch=null}
+  G.share=false;gSave();setStat("Not sharing.");
+  if(G.code&&G.me&&gU()&&gK()){try{await rpc("stop_sharing",{p_code:G.code,p_member:G.me})}catch(e){}}
+}
+// Keeps "last seen" fresh while you stand still. Stops by itself if the app is suspended.
+setInterval(()=>{if(watch!=null&&lastPos&&Date.now()-lastSent>=30000)send()},10000);
+
+async function refreshMembers(){
+  if(!G.code||!gU()||!gK())return;
+  try{rows=(await rpc("get_locations",{p_code:G.code}))||[];gErr=""}
+  catch(e){gErr="Couldn’t reach the group. Check your signal."}
+  renderMembers();
+  if(state.tab==="map")drawMap();
+}
+function ago(iso){const s=Math.max(0,(Date.now()-new Date(iso))/1000);return s<45?"just now":s<3600?Math.round(s/60)+" min ago":Math.round(s/3600)+" h ago"}
+const rad=x=>x*Math.PI/180;
+function dist(a,b){const dl=rad(b.lat-a.lat),dg=rad(b.lng-a.lng),h=Math.sin(dl/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dg/2)**2;return 2*6371000*Math.asin(Math.sqrt(h))}
+function bearing(a,b){const y=Math.sin(rad(b.lng-a.lng))*Math.cos(rad(b.lat)),x=Math.cos(rad(a.lat))*Math.sin(rad(b.lat))-Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(rad(b.lng-a.lng));return (Math.atan2(y,x)*180/Math.PI+360)%360}
+const DIRS=["north","northeast","east","southeast","south","southwest","west","northwest"];
+function fmtDist(m){const ft=m*3.28084;return ft<1000?Math.max(10,Math.round(ft/10)*10)+" ft":(m/1609.34).toFixed(1)+" mi"}
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+function mapLink(r){return isIOS?"https://maps.apple.com/?ll="+r.lat+","+r.lng+"&q="+encodeURIComponent(who(r.member)):"https://www.google.com/maps/search/?api=1&query="+r.lat+","+r.lng}
+function renderMembers(){
+  const el=$("#mem");if(!el)return;
+  if(gErr&&!rows.length){el.innerHTML='<p class="err">'+gErr+'</p>';return}
+  if(!rows.length){el.innerHTML='<p class="note">No one is sharing yet. Tap “Share my location”, and ask the others to do the same.</p>';return}
+  const sorted=rows.slice().sort((a,b)=>who(a.member).localeCompare(who(b.member)));
+  el.innerHTML=(gErr?'<p class="err">'+gErr+'</p>':"")+sorted.map(r=>{
+    const mine=r.member===G.me,stale=Date.now()-new Date(r.updated_at)>5*60e3;
+    let where="";
+    if(!mine&&lastPos){const d=dist(lastPos,r);where=fmtDist(d)+" "+DIRS[Math.round(bearing(lastPos,r)/45)%8]+". "}
+    return '<div class="mem'+(stale?" stale":"")+'"><b>'+esc(who(r.member))+(mine?" (you)":"")+'</b>'
+      +'<div class="meta">'+where+(stale?"Last seen ":"Updated ")+ago(r.updated_at)+'</div>'
+      +'<a href="'+mapLink(r)+'" target="_blank" rel="noopener">Open in Maps</a></div>';
+  }).join("");
+}
+function inviteLink(){
+  return location.origin+location.pathname+"#g="+G.code+"&u="+encodeURIComponent(gU())+"&k="+encodeURIComponent(gK())+(typeof tripParam==="function"&&tripParam()?"&"+tripParam():"");
+}
+
+
+/* ---------- trip setup and itinerary generator ---------- */
+const THRILL_OK={gentle:e=>e.th<=1||!!e.kid,moderate:e=>e.th<=2,thrill:()=>true};
+const THRILL_LABEL={gentle:"Gentle, for young children",moderate:"Moderate, coasters and spinners are fine",thrill:"Thrill, bring on the big drops"};
+const STAY_LABEL={resort:"A Disney Resort hotel",partner:"A partner hotel or the Disney Springs area",near:"Off-site, near Disney (Kissimmee, Lake Buena Vista, Davenport)",far:"Off-site, farther away (International Drive, Orlando)"};
+const STAY_MIN={resort:35,partner:40,near:60,far:75};
+const TICKET_LABEL={base:"One park per day",hopper:"Park Hopper",hopperplus:"Park Hopper Plus"};
+const LL_LABEL={none:"No Lightning Lane",multi:"Multi Pass",single:"Single Pass",multisingle:"Multi Pass and Single Pass",premier:"Premier Pass"};
+const LL_WINDOW="Disney Resort hotel guests can book 7 days before check-in. Everyone else can book 3 days before the visit. Booking opens at 7:00 AM.";
+
+let trip=store.get("trip",null);
+let DAYS=[];
+
+const P_=x=>x&&x.pos?{lat:x.pos[0],lng:x.pos[1]}:x;
+const distP=(a,b)=>dist(P_(a),P_(b));
+const walkMin=(a,b)=>Math.max(1,Math.round(distP(a,b)*PATH_FACTOR/WALK_MS/60));
+
+function overlayNote(e,date){const o=OVERLAYS.find(o=>o.n===e.n&&inRange(date,o.from,o.to));return o?o.note:""}
+
+// Why an attraction is left out of the plan for this trip, or "" if it can go in.
+function whyNot(e,t,date){
+  if(e.x)return e.x;
+  if(date&&e.c&&inRange(date,e.c[0],e.c[1]))return e.c[2];
+  if(date&&e.winter){const m=+date.slice(5,7);if(m>=1&&m<=4)return "Often closed for maintenance from January to April"}
+  if(t.height&&e.h>t.height)return "Needs "+e.h+" in. Your shortest rider is "+t.height+" in.";
+  if(!THRILL_OK[t.thrill||"moderate"](e))return "Too intense for your thrill setting";
+  if(e.reserve)return e.reserve===1?(e.noauto||"Needs a reservation or an app queue, so it isn’t scheduled. Add it if you book it."):e.reserve;
+  if(e.noauto)return e.noauto;
+  if(e.t==="meet"&&!t.meets)return "Character meets are off in your setup";
+  return "";
+}
+function candidates(pk,date,t){
+  const ok=[],skips=[];
+  CATALOG[pk].forEach(e=>{
+    if(e.night||!e.pos)return;
+    const r=whyNot(e,t,date);
+    if(r)skips.push([e.n,r]);else ok.push(e);
+  });
+  return {ok,skips};
+}
+
+// Which rides are worth a Lightning Lane, given the pass bought.
+function llTags(ok,t){
+  const tags=new Map(),mode=t.ll||"none",rideOK=e=>e.t==="ride"&&e.pri<=2;
+  if(mode==="premier"){ok.filter(e=>rideOK(e)||e.ll).forEach(e=>tags.set(e.id,"Premier Pass"));return tags}
+  if(mode==="multi"||mode==="multisingle")
+    ok.filter(e=>rideOK(e)&&e.ll!=="single").sort((a,b)=>b.dur-a.dur).slice(0,3).forEach(e=>tags.set(e.id,"Multi Pass"));
+  if(mode==="single"||mode==="multisingle")
+    ok.filter(e=>e.ll==="single"&&!tags.has(e.id)).sort((a,b)=>b.dur-a.dur).slice(0,2).forEach(e=>tags.set(e.id,"Single Pass"));
+  return tags;
+}
+
+// Walking order helpers: nearest neighbor, then 2-opt to remove crossings.
+function nnOrder(from,items){
+  const rest=items.slice(),out=[];let cur=from;
+  while(rest.length){
+    let bi=0,bd=1e12;rest.forEach((e,i)=>{const d=distP(cur,e);if(d<bd){bd=d;bi=i}});
+    const e=rest.splice(bi,1)[0];out.push(e);cur=e;
+  }
+  return out;
+}
+function pathLen(start,seq){let L=0,cur=start;seq.forEach(e=>{L+=distP(cur,e);cur=e});return L}
+function twoOpt(start,seq){
+  let best=seq.slice(),improved=true,guard=0;
+  while(improved&&guard++<50){
+    improved=false;
+    for(let i=0;i<best.length-1;i++)for(let j=i+1;j<best.length;j++){
+      const cand=best.slice(0,i).concat(best.slice(i,j+1).reverse(),best.slice(j+1));
+      if(pathLen(start,cand)+1<pathLen(start,best)){best=cand;improved=true}
+    }
+  }
+  return best;
+}
+function orOpt(start,seq){   // move one stop to a better spot until nothing improves
+  let best=seq.slice(),improved=true,guard=0;
+  while(improved&&guard++<50){
+    improved=false;
+    for(let i=0;i<best.length&&!improved;i++){
+      const item=best[i],rest=best.slice(0,i).concat(best.slice(i+1));
+      for(let j=0;j<=rest.length;j++){
+        if(j===i)continue;
+        const cand=rest.slice(0,j).concat([item],rest.slice(j));
+        if(pathLen(start,cand)+1<pathLen(start,best)){best=cand;improved=true;break}
+      }
+    }
+  }
+  return best;
+}
+// The shortest walking order from a start point. Exact for up to 10 stops, a strong heuristic beyond that.
+function bestOrder(start,seq){
+  const n=seq.length;
+  if(n<=1)return seq.slice();
+  if(n>10)return orOpt(start,twoOpt(start,nnOrder(start,seq)));
+  const pts=[start].concat(seq),D=pts.map(a=>pts.map(b=>distP(a,b)));
+  let best=null,bl=nnLen(D,n)+1;
+  const path=[];
+  const rec=(used,len)=>{
+    if(len>=bl)return;
+    if(path.length===n){bl=len;best=path.slice();return}
+    const last=path.length?path[path.length-1]:0;
+    for(let i=1;i<=n;i++){if(used&(1<<i))continue;path.push(i);rec(used|(1<<i),len+D[last][i]);path.pop()}
+  };
+  rec(0,0);
+  return best?best.map(i=>seq[i-1]):nnOrder(start,seq);
+}
+function nnLen(D,n){   // an upper bound to start pruning from
+  const seen=new Set([0]);let cur=0,L=0;
+  for(let k=0;k<n;k++){let bi=-1,bd=1e12;for(let i=1;i<=n;i++){if(!seen.has(i)&&D[cur][i]<bd){bd=D[cur][i];bi=i}}seen.add(bi);L+=bd;cur=bi}
+  return L;
+}
+
+const VERB={ride:"Ride ",show:"Watch ",walk:"Walk ",meet:"Meet ",exp:"Visit "};
+function mkItem(e,tag,date){
+  const ov=overlayNote(e,date);
+  const notes=[e.d,ov,tag?"Lightning Lane "+tag+". Book this one in the app.":""].filter(Boolean).join(" ");
+  const verify=e.t==="show"||e.t==="meet";
+  const extra=verify?(e.t==="show"?"Confirm showtimes in the app.":"Lineups rotate, so confirm in the app."):"";
+  return {t:VERB[e.t]+e.n,k:e.t,f:verify?"verify":"",n:[notes,extra].filter(Boolean).join(" "),e,pk:e.p,tag:tag||"",w:[e.n,e.q],g:null,ck:1};
+}
+
+function buildPark(pk,date,t){
+  const P=PARKS[pk],ov=(t.hours||{})[date]||{};
+  const open=ov.open||P.open,close=ov.close||P.close;
+  const openM=mins(open),closeM=mins(close);
+  const resort=t.stay==="resort";
+  const base=(t.travelMin!==""&&t.travelMin!=null&&!isNaN(+t.travelMin))?+t.travelMin:STAY_MIN[t.stay||"near"];
+  const travel=base+(pk==="mk"&&!resort?15:0);        // Magic Kingdom adds a ferry or monorail hop for drivers
+  const gateM=openM-(resort?45:30),leaveM=gateM-travel,t0=openM-(resort?30:0);
+  const night=CATALOG[pk].find(e=>e.night);
+  const nightOK=!!night&&closeM>=(pk==="ak"?19*60:19*60+30);
+  const longDay=closeM-t0>=6*60;
+  const breakAt=Math.max(t0+150,12*60+15);
+  const reserve=nightOK?night.dur+25:15;
+  const avail=(closeM-t0)-(longDay?60:0)-reserve-15;
+  const {ok,skips}=candidates(pk,date,t);
+  const tags=llTags(ok,t);
+  const eff=e=>tags.has(e.id)?Math.min(e.dur,20):e.dur;
+  const gate=P.gate;
+
+  // 1. what fits: priority first, then the longest lines
+  const chosen=[],left=[];let used=0;
+  ok.slice().sort((a,b)=>a.pri-b.pri||b.dur-a.dur).forEach(e=>{const c=eff(e)+6;if(used+c<=avail){chosen.push(e);used+=c}else left.push(e)});
+
+  // 2. rope drop: the two biggest rides without a Lightning Lane, close to each other
+  const ropeC=chosen.filter(e=>e.pri===1&&e.t==="ride"&&!tags.has(e.id)).sort((a,b)=>b.dur-a.dur);
+  let rope=[];
+  if(ropeC.length){
+    rope=[ropeC[0]];
+    const near=ropeC.slice(1,4).filter(e=>distP(ropeC[0],e)<900).sort((a,b)=>distP(ropeC[0],a)-distP(ropeC[0],b))[0];
+    if(near)rope.push(near);
+    rope.sort((a,b)=>distP(gate,a)-distP(gate,b));
+  }
+  const rest=chosen.filter(e=>!rope.includes(e));
+  const shows=rest.filter(e=>e.t==="show"),rides=rest.filter(e=>e.t!=="show");
+
+  // 3. morning: nearest stop next, until the midday break
+  const simRope=rope.reduce((c,e,i)=>c+walkMin(i?rope[i-1]:gate,e)+eff(e),0);
+  let clockM=t0+simRope,pos=rope.length?rope[rope.length-1]:gate;
+  const pool=rides.slice(),morning=[];
+  while(pool.length&&(!longDay||clockM<breakAt)){
+    let bi=0,bd=1e12;pool.forEach((e,i)=>{const d=distP(pos,e);if(d<bd){bd=d;bi=i}});
+    const e=pool[bi],step=walkMin(pos,e)+eff(e);
+    if(longDay&&clockM+step>breakAt+25)break;
+    pool.splice(bi,1);morning.push(e);clockM+=step;pos=e;
+  }
+  const mStart=rope.length?rope[rope.length-1]:gate;
+  const morningOpt=bestOrder(mStart,morning);
+  const afterPos=morningOpt.length?morningOpt[morningOpt.length-1]:mStart;
+  const afternoonOpt=bestOrder(afterPos,pool.concat(shows));
+
+  // 4. final times
+  let c=t0,cur=gate;const timed=[];
+  const place=(e,seg)=>{const w=walkMin(cur,e);c+=w;const s=c;c+=eff(e);timed.push({e,seg,start:s,end:c,walk:w});cur=e};
+  rope.forEach(e=>place(e,"rope"));
+  morningOpt.forEach(e=>place(e,"am"));
+  let breakStart=null;
+  if(longDay){c=Math.max(c,breakAt);breakStart=c;c+=60}
+  const dropped=[];
+  afternoonOpt.forEach(e=>{
+    if(c+walkMin(cur,e)+eff(e)<=closeM-reserve)place(e,"pm");else dropped.push(e);
+  });
+  let nightStart=null;
+  if(nightOK){
+    nightStart=Math.max(c,closeM-night.dur-15);
+    if(nightStart+night.dur>closeM)nightStart=null;
+  }
+  const walkTotal=timed.reduce((a,x)=>a+x.walk,0);
+
+  // 5. optional evening hop for Park Hopper tickets when the park closes early
+  let hop=null;
+  if(t.ticket!=="base"&&closeM<=19*60){
+    const hp=pk==="ep"?"hs":"ep",HP=PARKS[hp],hopClose=mins(HP.close),hopArr=closeM+45;
+    const hn=CATALOG[hp].find(e=>e.night);
+    const hnOK=!!hn&&hopClose>=19*60+30;
+    const hopAvail=(hopClose-hopArr)-(hnOK?hn.dur+25:15)-10;
+    if(hopClose-hopArr>=90&&hopAvail>=45){
+      const hc=candidates(hp,date,Object.assign({},t,{meets:false})).ok.filter(e=>e.t!=="walk").sort((a,b)=>a.pri-b.pri||b.dur-a.dur);
+      const hchosen=[];let hu=0;
+      hc.forEach(e=>{const cost=e.dur+6;if(hchosen.length<4&&hu+cost<=hopAvail){hchosen.push(e);hu+=cost}});
+      const order=bestOrder(HP.gate,hchosen);
+      let hcClock=hopArr,hcur=HP.gate;const ht=[];
+      order.forEach(e=>{const w=walkMin(hcur,e);hcClock+=w;const s=hcClock;hcClock+=e.dur;ht.push({e,start:s,end:hcClock,walk:w});hcur=e});
+      let hs=null;
+      if(hnOK){hs=Math.max(hcClock,hopClose-hn.dur-15);if(hs+hn.dur>hopClose)hs=null}
+      if(ht.length||hs!=null)hop={hp,HP,hopArr,ht,hn,hs,hopClose};
+    }
+  }
+
+  // 6. blocks
+  const blocks=[];
+  blocks.push({s:hhmm(leaveM),e:hhmm(t0),h:"Getting there",items:[
+    {t:"Leave "+(t.stayName||"your hotel")+" at "+fmt(hhmm(leaveM)),k:"go",f:"",n:"Allows about "+travel+" minutes from your door to the gate, including parking or transit. Change it in Trip setup if your trip is shorter or longer.",e:null,pk,tag:"",w:null,g:null,ck:0},
+    {t:"Be at the gate by "+fmt(hhmm(gateM)),k:"",f:"",n:resort?"Disney Resort hotel guests can enter 30 minutes before the park opens at "+fmt(open)+". Your plan starts then.":"The park opens at "+fmt(open)+". Arriving 30 minutes early puts you at the front for your first ride.",e:null,pk,tag:"",w:null,g:null,ck:0}
+  ]});
+  const seg=(name,seg)=>{
+    const xs=timed.filter(x=>x.seg===seg);
+    if(!xs.length)return;
+    blocks.push({s:hhmm(xs[0].start-xs[0].walk),e:hhmm(xs[xs.length-1].end),h:name,items:xs.map(x=>mkItem(x.e,tags.get(x.e.id),date))});
+  };
+  seg(rope.length>1?"At rope drop":"At rope drop","rope");
+  seg("Morning","am");
+  if(breakStart!=null)blocks.push({s:hhmm(breakStart),e:hhmm(breakStart+60),h:"Midday break",items:[
+    {t:"Take an hour to rest, eat or just sit in the shade",k:"tip",f:"",n:"This keeps the afternoon from feeling like a slog. Move it earlier or later if your group needs it.",e:null,pk,tag:"",w:null,g:null,ck:0}
+  ]});
+  seg("Afternoon","pm");
+  if(nightStart!=null)blocks.push({s:hhmm(nightStart),e:hhmm(nightStart+night.dur),h:"Evening",items:[mkItem(night,"",date)]});
+  if(hop){
+    const items=[{t:"Hop to "+hop.HP.label+" (allow about 45 minutes)",k:"go",f:"",n:"Park Hopper lets you switch parks after 2:00 PM. Bus, monorail or Skyliner times depend on where you stay, so check the transport options in the app.",e:null,pk:hop.hp,tag:"",w:null,g:null,ck:0}]
+      .concat(hop.ht.map(x=>mkItem(x.e,"",date)));
+    if(hop.hs!=null)items.push(mkItem(hop.hn,"",date));
+    blocks.push({s:hhmm(closeM),e:hhmm(hop.hs!=null?hop.hs+hop.hn.dur:hop.hopClose),h:"Evening hop to "+hop.HP.label,items});
+  }
+
+  // 7. notes for the day
+  const heads=[];
+  heads.push(ov.open||ov.close?"Hours: "+fmt(open)+" – "+fmt(close)+", as you set them.":"Hours: "+fmt(open)+" – "+fmt(close)+". These are typical for this park, so check your date and use Change park or hours if they differ.");
+  if(resort)heads.push("Disney Resort hotel guests get Early Entry, 30 minutes before opening. Your plan starts then.");
+  if(t.ll&&t.ll!=="none"){
+    const mp=[...tags].filter(x=>x[1]==="Multi Pass").map(x=>CATALOG[pk].find(e=>e.id===x[0]).n);
+    const sp=[...tags].filter(x=>x[1]==="Single Pass").map(x=>CATALOG[pk].find(e=>e.id===x[0]).n);
+    if(t.ll==="premier")heads.push("Lightning Lane Premier Pass covers every Lightning Lane ride in one park for the day, with no return times to book. It works in one park per day, so many guests use it on their busiest day. "+LL_WINDOW);
+    else{
+      if(mp.length)heads.push("Lightning Lane Multi Pass: choose up to 3 rides in one park. Worth booking here: "+mp.join(", ")+". Check which rides your pass includes. "+LL_WINDOW);
+      if(sp.length)heads.push("Lightning Lane Single Pass is bought per ride, up to 2 a day: "+sp.join(", ")+".");
+      else if(t.ll==="single")heads.push("No Single Pass ride is marked for this park. Check the app for the rides it covers.");
+    }
+  }
+  const closedToday=skips.filter(s=>{const e=CATALOG[pk].find(x=>x.n===s[0]);return e&&e.c&&inRange(date,e.c[0],e.c[1])}).map(s=>s[0]);
+  if(closedToday.length)heads.push("Closed on this date: "+closedToday.join(", ")+".");
+  if(hop)heads.push("Park Hopper: the plan adds an evening hop to "+hop.HP.label+" after "+PARKS[pk].label+" closes. You can hop to another park any time after 2:00 PM.");
+  else if(t.ticket!=="base")heads.push("Park Hopper: you can switch parks any time after 2:00 PM if you want a second park today.");
+
+  const why=[];
+  if(rope.length)why.push("At rope drop: "+rope.map(e=>e.n).join(" then ")+". Lines are shortest in the first hour.");
+  why.push("Stops are ordered to keep walking short. About "+walkTotal+" minutes of walking from the gate to the last stop, at stroller pace.");
+  if(breakStart!=null)why.push("A one-hour break at "+fmt(hhmm(breakStart))+" so the afternoon doesn’t wear everyone out.");
+  if(afternoonOpt.some(e=>e.t==="show"))why.push("Shows are in the afternoon, when you want a seat and some air-conditioning. Confirm showtimes in the app.");
+  if(nightStart!=null)why.push("The day ends with "+night.n+".");
+  if(tags.size)why.push("Lightning Lane picks are the rides with the longest lines, which saves the most time.");
+
+  const sk=skips.slice();
+  const notFit=dropped.concat(left).filter(e=>e.pri<=2).map(e=>e.n);
+  if(notFit.length)sk.push(["Didn’t fit in the hours",notFit.join(", ")+". Swap one in if lines are short."]);
+
+  return {
+    id:"d"+date,kind:"park",date,dw:dowOf(date),dn:dnOf(date),short:P.short,cls:P.cls,pk,park:P.label,
+    sub:"Rope drop at "+fmt(open)+(resort?", Early Entry at "+fmt(hhmm(t0)):""),
+    hours:fmt(open)+" – "+fmt(close),hoursNote:ov.open||ov.close?"Hours you set.":"Typical hours. Confirm for your date.",
+    open,close,heads,why,blocks,skips:sk,segs:hop?[pk,hop.hp]:[pk],walkTotal
+  };
+}
+
+function buildOther(slot,date,t){
+  const T={
+    arrive:{short:"Arrive",h:"Arrival day",sub:"No parks planned",items:[
+      ["Check in, settle in and rest.","go"],
+      ["If you have energy, Disney Springs or a resort walk is an easy start.","tip"],
+      ["If you bought Lightning Lane, remember: "+LL_WINDOW,"tip"]]},
+    rest:{short:"Rest",h:"Rest day",sub:"No parks planned",items:[
+      ["Sleep in, swim, or visit Disney Springs.","tip"],
+      ["Resting once every few days makes the park days better.","tip"]]},
+    depart:{short:"Depart",h:"Departure day",sub:"No parks planned",items:[
+      ["Leave time for checkout and the trip to the airport.","go"]]}
+  }[slot];
+  return {
+    id:"d"+date,kind:slot,date,dw:dowOf(date),dn:dnOf(date),short:T.short,cls:"t-rest",pk:null,park:T.h,sub:T.sub,
+    hours:"",hoursNote:"",heads:[],why:[],skips:[],segs:[],
+    blocks:[{s:"09:00",e:"18:00",h:T.h,items:T.items.map(x=>({t:x[0],k:x[1],f:"",n:"",e:null,pk:null,tag:"",w:null,g:null,ck:0}))}]
+  };
+}
+
+// Which of the stay's days are park days. Arrival and departure days stay free when there's room.
+function assignSlots(n,pd){
+  const s=new Array(n).fill("rest");
+  let first=0,last=n-1;
+  if(pd<=n-2){s[0]="arrive";s[n-1]="depart";first=1;last=n-2}
+  const avail=last-first+1,park=Math.min(pd,avail);
+  const seq=[];
+  if(park>=avail){for(let i=0;i<avail;i++)seq.push("park")}
+  else{
+    let restLeft=avail-park;const k=Math.ceil(park/(restLeft+1));
+    for(let p=0;p<park;p++){seq.push("park");if((p+1)%k===0&&restLeft>0&&p<park-1){seq.push("rest");restLeft--}}
+    while(seq.length<avail)seq.push("rest");
+  }
+  seq.forEach((v,i)=>{s[first+i]=v});
+  return s;
+}
+function parkOrder(k){const b=["mk","ep","hs","ak"];return Array.from({length:k},(_,i)=>b[i%4])}
+
+function generate(t){
+  const out=[],n=t.nights+1,slots=assignSlots(n,t.parkDays),order=parkOrder(t.parkDays);
+  let pi=0;
+  for(let i=0;i<n;i++){
+    const date=addDays(t.start,i);
+    if(slots[i]==="park"){const pk=(t.park||{})[date]||order[pi];pi++;out.push(buildPark(pk,date,t))}
+    else out.push(buildOther(slots[i],date,t));
+  }
+  return out;
+}
+
+// A trip can travel in a link, so friends open the same plan. Everything that arrives is validated.
+function cleanTrip(o){
+  if(!o||typeof o!=="object")return null;
+  const start=String(o.start||"");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||isNaN(new Date(start+"T12:00:00Z")))return null;
+  const nights=Math.min(21,parseInt(o.nights,10)||0),pd=Math.min(nights+1,parseInt(o.parkDays,10)||0);
+  if(nights<1||pd<1)return null;
+  const pick=(v,obj,d)=>Object.prototype.hasOwnProperty.call(obj,v)?v:d;
+  const tv=(o.travelMin===""||o.travelMin==null)?"":Math.min(240,Math.max(5,parseInt(o.travelMin,10)||0));
+  const hours={},park={};
+  Object.keys(o.hours||{}).slice(0,40).forEach(d=>{const h=o.hours[d];if(/^\d{4}-\d{2}-\d{2}$/.test(d)&&h&&/^\d{2}:\d{2}$/.test(h.open)&&/^\d{2}:\d{2}$/.test(h.close)&&mins(h.close)>mins(h.open))hours[d]={open:h.open,close:h.close}});
+  Object.keys(o.park||{}).slice(0,40).forEach(d=>{if(/^\d{4}-\d{2}-\d{2}$/.test(d)&&Object.prototype.hasOwnProperty.call(PARKS,o.park[d]))park[d]=o.park[d]});
+  const ht=parseInt(o.height,10);
+  return {start,nights,parkDays:pd,ticket:pick(o.ticket,TICKET_LABEL,"base"),ll:pick(o.ll,LL_LABEL,"none"),stay:pick(o.stay,STAY_LABEL,"near"),
+    stayName:String(o.stayName||"").slice(0,40),travelMin:tv||"",height:ht>=20&&ht<=80?ht:0,thrill:pick(o.thrill,THRILL_LABEL,"moderate"),meets:o.meets!==false,hours,park};
+}
+const tripParam=()=>trip?"t="+encodeURIComponent(JSON.stringify(trip)):"";
+const tripLink=()=>location.origin+location.pathname+(trip?"#"+tripParam():"");
+
+function regen(){DAYS=trip?generate(trip):[]}
+function planIds(){
+  const s=new Set();
+  DAYS.forEach(d=>d.blocks.forEach(b=>b.items.forEach(x=>{if(x.e)s.add(x.e.id)})));
+  return s;
+}
+
+/* ---------- stops, numbering and walking ---------- */
+const SN={};
+function dayStops(day){
+  const stops=[];
+  day.blocks.forEach((b,bi)=>b.items.forEach((x,ii)=>{
+    if(!x.e||!x.e.pos||x.k==="tip"||x.k==="go")return;
+    stops.push({name:x.e.n,lat:x.e.pos[0],lng:x.e.pos[1],approx:!!x.e.pos[2],time:b.s,bi,ii,pk:x.pk||day.pk});
+  }));
+  return {stops};
+}
+function stopNums(day){
+  if(!SN[day.id]){const m={};dayStops(day).stops.forEach((s,i)=>{m[s.bi+":"+s.ii]=i+1});SN[day.id]=m}
+  return SN[day.id];
+}
+// walking to each stop in one park, starting at that park's entrance
+function legsOf(pk,list){
+  return list.map((s,i)=>{
+    const from=i?list[i-1]:PARKS[pk].gate;
+    const m=dist(from,s)*PATH_FACTOR;
+    return {m,min:Math.max(1,Math.round(m/WALK_MS/60))};
+  });
+}
+function segStops(day,pk){return dayStops(day).stops.map((s,i)=>Object.assign({n:i+1},s)).filter(s=>s.pk===pk)}
+function paintWalk(){
+  const el=$("#walkline");if(!el)return;
+  const day=DAYS[state.day];
+  if(!day||day.kind!=="park"){el.textContent="";return}
+  let m=0,min=0,n=0;
+  day.segs.forEach(pk=>{const st=segStops(day,pk),lg=legsOf(pk,st);st.forEach(()=>n++);lg.forEach(l=>{m+=l.m;min+=l.min})});
+  el.textContent="Walking today: about "+min+" min ("+(m/1609.34).toFixed(1)+" mi) from the gate through "+n+" numbered stops. Straight-line estimate at stroller pace, so real paths run longer.";
+}
+
+
+/* ---------- map ---------- */
+let mapObj=null,mapLayer=null,mapFitted=false;
+function loadLeaflet(){
+  if(window.L)return Promise.resolve();
+  if(loadLeaflet.p)return loadLeaflet.p;
+  loadLeaflet.p=new Promise((res,rej)=>{
+    const css=document.createElement("link");css.rel="stylesheet";css.href=LEAFLET+"leaflet.css";document.head.appendChild(css);
+    const sc=document.createElement("script");sc.src=LEAFLET+"leaflet.js";sc.onload=res;
+    sc.onerror=()=>{loadLeaflet.p=null;rej(new Error("leaflet"))};document.head.appendChild(sc);
+  });
+  return loadLeaflet.p;
+}
+const curSeg=day=>{const s=day.segs||[];return s[state.seg]||s[0]};
+function mapHTML(){
+  const day=DAYS[state.day];
+  if(!day||day.kind!=="park")return '<section class="sec"><h1>Map</h1><p>There are no park stops on this day. Pick a park day above.</p></section>';
+  const pk=curSeg(day);
+  const segBtns=day.segs.length>1?'<div class="seg">'+day.segs.map((p,i)=>'<button type="button" class="btn" data-act="mseg" data-i="'+i+'" aria-pressed="'+(p===pk)+'">'+PARKS[p].label+'</button>').join("")+'</div>':"";
+  return '<section class="sec"><h1>Map</h1><p>'+PARKS[pk].label+', in the same order as the Plan tab. The pin numbers match the numbers on each stop in the plan. Meals and rest stops aren’t shown.</p>'+segBtns
+    +'<div id="map" class="map" role="region" aria-label="Map of '+PARKS[pk].label+'"><p class="note" style="padding:12px">Loading map...</p></div>'
+    +'<div class="btns"><button type="button" class="btn" data-act="mlocate">Show me on the map</button>'
+    +'<button type="button" class="btn" data-act="mfit">Fit all stops</button></div>'
+    +'<p class="fine" id="mapnote">Map: OpenStreetMap contributors. For Disney’s official illustrated map, use the My Disney Experience app.</p></section>'
+    +'<section class="sec"><h2>Walking between stops</h2><div id="legs"></div></section>';
+}
+function paintLegs(){
+  const el=$("#legs");if(!el)return;
+  const day=DAYS[state.day];if(!day||day.kind!=="park")return;
+  const pk=curSeg(day),st=segStops(day,pk),lg=legsOf(pk,st),total=lg.reduce((a,l)=>a+l.min,0);
+  if(!st.length){el.innerHTML='<p class="note">No stops in this park today.</p>';return}
+  el.innerHTML='<ol class="legs">'+st.map((s,i)=>'<li><b>'+s.n+'. '+esc(s.name)+(s.approx?' <span class="approx" title="Position estimated">≈</span>':"")+'</b><span class="meta">'+fmt(s.time)
+    +". "+fmtDist(lg[i].m)+", about "+lg[i].min+" min from "+(i?"the last stop":"the park entrance")+'</span></li>').join("")+'</ol>'
+    +'<p class="note">About '+total+' min of walking in total. Meals and tips aren’t on the map. ≈ means the position is estimated from the park layout.</p>';
+}
+async function initMap(){
+  const day=DAYS[state.day];if(!day||day.kind!=="park")return;
+  const pk=curSeg(day);
+  paintLegs();
+  try{await loadLeaflet()}
+  catch(e){const el=$("#map");if(el)el.innerHTML='<p class="err" style="margin:0">The map needs a connection. The walking list below still works.</p>';return}
+  const el=$("#map");
+  if(!el||state.tab!=="map")return;
+  if(mapObj){mapObj.remove();mapObj=null;mapLayer=null}
+  el.innerHTML="";mapFitted=false;
+  const c=PARKS[pk].center;
+  mapObj=L.map(el,{zoomControl:true}).setView([c[0],c[1]],c[2]);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap contributors"}).addTo(mapObj);
+  drawMap();
+  setTimeout(()=>{if(mapObj)mapObj.invalidateSize()},250);
+}
+function drawMap(){
+  if(!mapObj||state.tab!=="map")return;
+  const day=DAYS[state.day];if(!day||day.kind!=="park")return;
+  if(mapLayer)mapLayer.remove();
+  mapLayer=L.layerGroup().addTo(mapObj);
+  const pk=curSeg(day),stops=segStops(day,pk),gate=PARKS[pk].gate;
+  const col=(getComputedStyle(document.body).getPropertyValue("--c")||"#1F7A4D").trim();
+  const route=[[gate.lat,gate.lng]].concat(stops.map(s=>[s.lat,s.lng]));
+  if(route.length>1)L.polyline(route,{color:col,weight:3,opacity:.75,dashArray:"6 8"}).addTo(mapLayer);
+  L.circleMarker([gate.lat,gate.lng],{radius:6,color:"#fff",weight:2,fillColor:col,fillOpacity:1}).bindTooltip("Entrance",{permanent:true,direction:"bottom",offset:[0,6]}).addTo(mapLayer);
+  stops.forEach(s=>{
+    L.marker([s.lat,s.lng],{icon:L.divIcon({className:"pin",html:"<span>"+s.n+"</span>",iconSize:[28,28],iconAnchor:[14,14]}),title:s.name})
+      .bindPopup("<b>"+s.n+". "+esc(s.name)+"</b><br>"+fmt(s.time)+(s.approx?"<br>Position estimated":"")).addTo(mapLayer);
+  });
+  rows.forEach(r=>{
+    L.circleMarker([r.lat,r.lng],{radius:8,color:"#fff",weight:2,fillColor:"#17202B",fillOpacity:1})
+      .bindTooltip(esc(who(r.member))+(r.member===G.me?" (you)":""),{permanent:true,direction:"top",offset:[0,-8]}).addTo(mapLayer);
+  });
+  if(lastPos&&!rows.some(r=>r.member===G.me)){
+    L.circleMarker([lastPos.lat,lastPos.lng],{radius:8,color:"#fff",weight:2,fillColor:"#2563EB",fillOpacity:1})
+      .bindTooltip("You",{permanent:true,direction:"top",offset:[0,-8]}).addTo(mapLayer);
+  }
+  if(!mapFitted){mapFitted=true;mapObj.fitBounds(L.latLngBounds(route),{padding:[30,30],maxZoom:17})}
+}
+
+
+function groupHTML(){
+  const u=gU(),k=gK();
+  let h='<section class="sec"><h1>Group</h1><p>See where everyone is. Your location is shared only while you switch it on.</p>';
+  if(!u||!k){
+    h+='<h2>Connect your free Supabase project</h2><p>One person does this once, then sends everyone an invite link. Run the setup SQL in your Supabase project first, then paste the project URL and publishable key here.</p>'
+      +'<div class="btns"><button type="button" class="btn" data-act="gsql">Copy setup SQL</button></div>'
+      +'<details class="more"><summary>Show the SQL</summary><pre class="sql">'+SETUP_SQL_ALL.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</pre></details>'
+      +'<label class="lbl" for="gu">Project URL</label><input class="inp" id="gu" inputmode="url" autocapitalize="off" autocomplete="off" placeholder="https://abcdxyz.supabase.co">'
+      +'<label class="lbl" for="gk">Publishable key</label><input class="inp" id="gk" autocapitalize="off" autocomplete="off" placeholder="sb_publishable_... or the anon key">'
+      +'<div class="btns"><button type="button" class="btn pri" data-act="gsave">Save</button></div>'
+      +'<p class="note">Never paste a secret or service_role key. Only the publishable (anon) key belongs here.</p>';
+  }else if(!G.code){
+    h+='<div class="btns"><button type="button" class="btn pri" data-act="gstart">Start a group</button></div>'
+      +'<p class="note">Joining someone else’s group? Open the invite link they sent you instead.</p>';
+  }else if(!G.me){
+    h+='<label class="lbl" for="gn">Your name</label><input class="inp" id="gn" maxlength="24" autocomplete="given-name" placeholder="Mom">'
+      +'<div class="btns"><button type="button" class="btn pri" data-act="gname">Join group</button></div>';
+  }else{
+    h+='<p><b>'+esc(who(G.me))+'</b>, you’re in the group.</p>'
+      +'<div class="btns"><button type="button" class="btn '+(watch!=null?"warn":"pri")+'" data-act="gshare">'+(watch!=null?"Stop sharing":"Share my location")+'</button>'
+      +'<button type="button" class="btn" data-act="ginvite">Invite friends</button></div>'
+      +'<p class="stat" id="gstat">'+(gStat||(watch!=null?"Sharing.":"Not sharing."))+'</p>'
+      +'<p class="stat">Shared notes and ride check-ins: '+(GD.avail===true?"working.":GD.avail===false?"off. Copy the setup SQL below and run it in Supabase.":"checking...")+'</p>'
+      +(GD.avail===false?'<div class="btns"><button type="button" class="btn" data-act="gsql">Copy setup SQL</button></div>':"")
+      +'<h2 style="margin-top:20px">Everyone</h2><div id="mem"></div>'
+      +(lastPos?"":'<div class="btns"><button type="button" class="btn" data-act="gdist">Show distances from me</button></div>')
+      +'<p class="note">Updates every 15 seconds while this tab is open.</p>'
+      +'<div class="btns"><button type="button" class="btn warn" data-act="gleave">Leave group</button></div>';
+  }
+  h+='</section><p class="fine">Sharing works only while this app is open on your screen. iPhone and Android pause web apps when you lock the phone or switch apps, so the last-seen time is the truth. Anyone with the invite link can see everyone’s location, so don’t post it. Locations are deleted after 12 hours, and when you stop sharing.</p>';
+  return h;
+}
+
+
+/* ---------- shared data: notes and ride check-ins ---------- */
+// Everything below saves on this phone first. When you're in a group, it also syncs through Supabase.
+
+const GD={rows:store.get("gd",{}),pend:{},dirty:store.get("gddirty",[]),avail:null,busy:false};   // rows: "kind|key" -> text
+const gk=(kind,key)=>kind+"|"+key;
+const grouped=()=>!!(G.code&&gU()&&gK());
+const gdSave=()=>{store.set("gd",GD.rows);store.set("gddirty",GD.dirty)};
+function gdGet(kind,key){return GD.rows[gk(kind,key)]}
+function gdAll(kind){const p=kind+"|";return Object.keys(GD.rows).filter(a=>a.startsWith(p)).map(a=>({key:a.slice(p.length),val:GD.rows[a]}))}
+function gdCall(op){
+  return op.o==="put"?rpc("gd_put",{p_code:G.code,p_kind:op.kind,p_key:op.key,p_val:op.val}):rpc("gd_del",{p_code:G.code,p_kind:op.kind,p_key:op.key});
+}
+function gdQueue(op){GD.dirty=GD.dirty.filter(d=>!(d.kind===op.kind&&d.key===op.key));GD.dirty.push(op);gdSave()}
+function gdSend(op){
+  if(!grouped()||GD.avail===false)return;
+  gdCall(op).then(()=>{GD.dirty=GD.dirty.filter(d=>!(d.kind===op.kind&&d.key===op.key));gdSave()})
+    .catch(e=>{if(/ 404/.test(String(e&&e.message)))GD.avail=false;gdQueue(op)});
+}
+function gdSet(kind,key,val){const a=gk(kind,key);GD.rows[a]=val;GD.pend[a]=Date.now();gdSave();gdSend({o:"put",kind,key,val})}
+function gdDel(kind,key){const a=gk(kind,key);delete GD.rows[a];GD.pend[a]=Date.now();gdSave();gdSend({o:"del",kind,key})}
+
+function softRender(){
+  const ae=document.activeElement;
+  if(ae&&(ae.tagName==="TEXTAREA"||(ae.tagName==="INPUT"&&ae.type!=="checkbox")))return;
+  if(!["plan","rides","meals","notes"].includes(state.tab))return;
+  if(state.tab==="notes"&&state.editRem)return;
+  const y=window.scrollY;render();window.scrollTo(0,y);
+}
+async function gdSync(){
+  if(!grouped()||GD.busy)return;
+  GD.busy=true;const was=GD.avail;let changed=false;
+  try{
+    if(G.gdFor!==G.code){   // first time in this group: share what's already on this phone
+      for(const a of Object.keys(GD.rows)){const i=a.indexOf("|");await rpc("gd_put",{p_code:G.code,p_kind:a.slice(0,i),p_key:a.slice(i+1),p_val:GD.rows[a]})}
+      G.gdFor=G.code;gSave();
+    }
+    for(const op of GD.dirty.slice()){await gdCall(op);GD.dirty=GD.dirty.filter(d=>!(d.kind===op.kind&&d.key===op.key))}
+    const list=(await rpc("gd_list",{p_code:G.code}))||[];
+    const next={};list.forEach(r=>{next[gk(r.kind,r.key)]=r.val});
+    const now=Date.now();
+    Object.keys(GD.pend).forEach(a=>{   // keep very recent local edits until the server catches up
+      if(now-GD.pend[a]<5000){if(a in GD.rows)next[a]=GD.rows[a];else delete next[a]}else delete GD.pend[a];
+    });
+    changed=JSON.stringify(next)!==JSON.stringify(GD.rows);
+    GD.rows=next;GD.avail=true;gdSave();
+  }catch(e){
+    if(/ 404/.test(String(e&&e.message)))GD.avail=false;   // the setup SQL hasn't been run yet
+  }finally{GD.busy=false}
+  if(changed||was!==GD.avail)softRender();
+}
+function gdNotice(){
+  if(grouped()&&GD.avail===false)return '<div class="err">Sharing is off until you run the updated setup SQL. <button type="button" class="linkbtn" data-act="gsql">Copy setup SQL</button> Paste it into the SQL Editor in Supabase and run it. It’s safe to run again.</div>';
+  return "";
+}
+
+/* ---------- people on this phone ---------- */
+let ppl=store.get("people",null);
+if(!ppl||!ppl.length){ppl=[G.me?who(G.me):"Me"];store.set("people",ppl)}
+const pKey=n=>slug(n)||"x";
+const ownerId=()=>G.me||"local";
+const myName=()=>G.me?who(G.me):(ppl[0]||"Me");
+function personName(pk){let v={};try{v=JSON.parse(gdGet("person",pk)||"{}")}catch(e){}return v.n||pk}
+function syncPeople(){
+  if(G.me&&ppl.length===1&&ppl[0]==="Me"){ppl=[who(G.me)];store.set("people",ppl)}
+  ppl.forEach(n=>{
+    const k=pKey(n);let v={};try{v=JSON.parse(gdGet("person",k)||"{}")}catch(e){}
+    if(v.o!==ownerId()||v.n!==n)gdSet("person",k,JSON.stringify({n,o:ownerId()}));
+  });
+}
+function addPerson(raw){
+  const n=String(raw||"").replace(/\s+/g," ").trim().slice(0,20);
+  if(!n)return "Type a name first";
+  const k=pKey(n);
+  if(ppl.some(x=>pKey(x)===k))return n+" is already on this phone";
+  let v={};try{v=JSON.parse(gdGet("person",k)||"{}")}catch(e){}
+  if(v.o&&v.o!=="local"&&v.o!==ownerId())return "Someone else in the group already uses “"+n+"”. Add an initial, like “"+n+" S.”";
+  ppl.push(n);store.set("people",ppl);syncPeople();return "";
+}
+function removePerson(n){
+  if(ppl.length<2)return "Keep at least one name on this phone";
+  ppl=ppl.filter(x=>x!==n);store.set("people",ppl);gdDel("person",pKey(n));return "";
+}
+function peopleHTML(){
+  return '<details class="more" data-s="pplOpen"'+(state.pplOpen?" open":"")+'><summary>Checking in for: '+ppl.map(esc).join(", ")+'</summary>'
+    +'<p class="note" style="margin:0 0 8px">Tap a name under a ride when that person has done it. Add everyone who’s with you on this phone, such as your partner and your child. The rest of the group sees these names.</p>'
+    +'<div class="chips">'+ppl.map(n=>'<span class="chipbtn pn">'+esc(n)+'<button type="button" class="xbtn" aria-label="Remove '+esc(n)+'" data-act="prem" data-n="'+esc(n)+'">✕</button></span>').join("")+'</div>'
+    +'<input class="inp" id="pn" maxlength="20" autocomplete="off" placeholder="Add a name">'
+    +'<div class="btns" style="margin-bottom:12px"><button type="button" class="btn" data-act="padd">Add name</button></div></details>';
+}
+
+/* ---------- per-person ride check-ins ---------- */
+function ckHTML(rk){
+  const mine=new Set(ppl.map(pKey));
+  const chips=ppl.map(n=>{
+    const on=gdGet("ride",rk+"~"+pKey(n))!==undefined;
+    return '<button type="button" class="pchip" aria-pressed="'+on+'" data-act="ck" data-rk="'+rk+'" data-p="'+esc(pKey(n))+'">'+(on?"✓ ":"")+esc(n)+'</button>';
+  }).join("");
+  const others=gdAll("ride").filter(r=>r.key.startsWith(rk+"~")&&!mine.has(r.key.slice(rk.length+1))).map(r=>esc(personName(r.key.slice(rk.length+1))));
+  return '<span class="ckrow" role="group" aria-label="Done by">'+chips+(others.length?'<span class="also">Also done: '+others.join(", ")+'</span>':"")+'</span>';
+}
+function checkinSummary(){
+  const c={};
+  gdAll("ride").forEach(r=>{const pk=r.key.split("~")[1];if(pk)c[pk]=(c[pk]||0)+1});
+  return Object.keys(c).sort().map(pk=>esc(personName(pk))+" "+c[pk]).join(", ");
+}
+
+/* ---------- group notes and reminders ---------- */
+let memo=store.get("memo","");
+function remList(){
+  return gdAll("rem").map(r=>{let v={};try{v=JSON.parse(r.val)||{}}catch(e){}return {id:r.key,t:String(v.t||""),due:v.due||"",done:!!v.done,by:v.by||""}});
+}
+function remPut(r){gdSet("rem",r.id,JSON.stringify({t:r.t,due:r.due,done:r.done,by:r.by||myName()}))}
+const isDue=r=>!r.done&&r.due&&new Date(r.due)<=new Date();
+function dueLabel(r){return r.due?new Date(r.due).toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):""}
+(function migrateOldReminders(){   // reminders saved on this phone by the previous version
+  const old=store.get("rem",[]);
+  if(old&&old.length){old.forEach(r=>{if(gdGet("rem",r.id)===undefined)GD.rows[gk("rem",r.id)]=JSON.stringify({t:r.t,due:r.due||"",done:!!r.done,by:""})});gdSave();store.set("rem",[])}
+})();
+function dueBanner(){
+  const d=remList().filter(isDue);
+  if(!d.length)return "";
+  return '<div class="remind"><b>Reminder'+(d.length>1?"s":"")+'</b>'+d.map(r=>'<div class="rline"><span>'+esc(r.t)+'</span><button type="button" class="btn" data-act="rdone" data-id="'+r.id+'">Done</button></div>').join("")+'</div>';
+}
+function remindersHTML(){
+  const list=remList().sort((a,b)=>(a.done-b.done)||((a.due||"9")>(b.due||"9")?1:-1));
+  const rows=list.map(r=>{
+    if(state.editRem===r.id)return '<li class="rem"><label class="lbl" for="re_t">Note or reminder</label><input class="inp" id="re_t" maxlength="200" value="'+esc(r.t)+'">'
+      +'<label class="lbl" for="re_d">When (optional)</label><input class="inp" id="re_d" type="datetime-local" value="'+esc(r.due||"")+'">'
+      +'<div class="btns"><button type="button" class="btn pri" data-act="rsave" data-id="'+r.id+'">Save</button><button type="button" class="btn" data-act="rcancel">Cancel</button></div></li>';
+    return '<li class="rem'+(r.done?" done":"")+'"><label class="remlab"><input type="checkbox" data-r="'+r.id+'"'+(r.done?" checked":"")+'><span class="tx"><span class="ttl">'+esc(r.t)+'</span>'
+      +(isDue(r)?'<span class="badge b-removed">Due</span>':"")+'<small>'+(r.due?dueLabel(r)+". ":"")+(r.by?"Added by "+esc(r.by):"")+'</small></span></label>'
+      +'<div class="rbtns"><button type="button" class="linkbtn" data-act="redit" data-id="'+r.id+'">Edit</button><button type="button" class="linkbtn" data-act="rdel" data-id="'+r.id+'">Delete</button></div></li>';
+  }).join("");
+  const how=grouped()?(GD.avail===false?"Sharing is off until the updated setup SQL is run (see the note above).":"Shared with your whole group. Anyone can add, edit, check off or delete, and changes show up within about 15 seconds."):"Saved on this phone only. Join your group on the Group tab to share them.";
+  return '<section class="sec"><h2>Group notes and reminders</h2>'+gdNotice()+'<p>'+how+' Reminders with a time show at the top of the Plan tab once they’re due, while the app is open. They don’t buzz your phone when it’s closed.</p>'
+    +'<label class="lbl" for="rt">New note or reminder</label><input class="inp" id="rt" maxlength="200" placeholder="Book the boutique, buy ponchos...">'
+    +'<label class="lbl" for="rd">When (optional)</label><input class="inp" id="rd" type="datetime-local">'
+    +'<div class="btns"><button type="button" class="btn pri" data-act="radd">Add</button></div>'
+    +(rows?'<ul class="catlist" style="list-style:none;padding:0;margin:8px 0 0">'+rows+'</ul>':'<p class="note">Nothing here yet.</p>')+'</section>'
+    +'<section class="sec"><h2>Private notes</h2><p>Only on this phone. Saves as you type.</p>'
+    +'<textarea class="inp" id="memo" rows="5" placeholder="Locker number, where we parked...">'+esc(memo)+'</textarea></section>';
+}
+
+
+/* ---------- setup form ---------- */
+function setupHTML(first){
+  const t=trip||{};
+  const v=(k,d)=>t[k]!=null&&t[k]!==""?t[k]:d;
+  const sel=(id,cur,opts)=>'<select class="inp" id="'+id+'">'+Object.keys(opts).map(k=>'<option value="'+k+'"'+(cur===k?" selected":"")+'>'+opts[k]+'</option>').join("")+'</select>';
+  return '<div class="setup-in"><h1>'+(first?"Plan your Disney World trip":"Trip setup")+'</h1>'
+    +'<p class="sub">'+(first?"Answer a few questions and the app builds your day-by-day plan, a map and a ride list. You can change any answer later.":"Change an answer and the plan is rebuilt. Your notes and ride check-ins stay.")+'</p>'
+    +'<p class="err" id="su_err" hidden></p>'
+    +'<label class="lbl" for="su_start">First day (your check-in date)</label><input class="inp" id="su_start" type="date" value="'+esc(v("start",""))+'">'
+    +'<label class="lbl" for="su_nights">Nights you’re staying</label><input class="inp" id="su_nights" type="number" min="1" max="21" inputmode="numeric" value="'+esc(v("nights",4))+'">'
+    +'<label class="lbl" for="su_pd">Park days on your ticket</label><input class="inp" id="su_pd" type="number" min="1" max="22" inputmode="numeric" value="'+esc(v("parkDays",3))+'">'
+    +'<p class="hint">If you stay longer than you have park days, the app adds rest days and keeps your arrival and departure days free.</p>'
+    +'<label class="lbl" for="su_ticket">Ticket type</label>'+sel("su_ticket",v("ticket","base"),TICKET_LABEL)
+    +'<p class="hint">Park Hopper lets you switch parks after 2:00 PM, so the plan can add an evening hop.</p>'
+    +'<label class="lbl" for="su_ll">Lightning Lane</label>'+sel("su_ll",v("ll","none"),LL_LABEL)
+    +'<p class="hint">It’s sold separately from tickets. The plan marks which rides are worth it.</p>'
+    +'<label class="lbl" for="su_stay">Where you’re staying</label>'+sel("su_stay",v("stay","near"),STAY_LABEL)
+    +'<p class="hint">This sets when to leave, and Disney Resort hotel guests get Early Entry.</p>'
+    +'<label class="lbl" for="su_name">Hotel or area name (optional)</label><input class="inp" id="su_name" maxlength="40" autocomplete="off" placeholder="Champions Gate villa" value="'+esc(v("stayName",""))+'">'
+    +'<label class="lbl" for="su_travel">Minutes from your door to the park gate (optional)</label><input class="inp" id="su_travel" type="number" min="5" max="240" inputmode="numeric" placeholder="Leave blank to estimate" value="'+esc(v("travelMin",""))+'">'
+    +'<label class="lbl" for="su_height">Shortest rider’s height in inches (optional)</label><input class="inp" id="su_height" type="number" min="20" max="80" inputmode="numeric" placeholder="For example 40" value="'+esc(v("height","")||"")+'">'
+    +'<p class="hint">Rides with a higher minimum are left out. Leave it blank if everyone is tall enough for everything.</p>'
+    +'<label class="lbl" for="su_thrill">Thrill level</label>'+sel("su_thrill",v("thrill","moderate"),THRILL_LABEL)
+    +'<label class="check"><input type="checkbox" id="su_meets"'+(t.meets===false?"":" checked")+'><span>Include character meets in the plan</span></label>'
+    +'<div class="btns" style="margin-top:18px"><button type="button" class="btn pri" data-act="setupsave">'+(first?"Build my plan":"Save and rebuild")+'</button>'
+    +(first?"":'<button type="button" class="btn" data-act="setupcancel">Cancel</button>')+'</div>'
+    +'<p class="fine">Park facts checked '+KNOWLEDGE+'. Created by Avinash.</p></div>';
+}
+function showSetup(first){const el=$("#setup");el.innerHTML=setupHTML(first);el.hidden=false;document.body.style.overflow="hidden";el.scrollTop=0}
+function hideSetup(){const el=$("#setup");el.hidden=true;document.body.style.overflow=""}
+function saveSetup(){
+  const g=id=>$("#"+id),err=m=>{const e=$("#su_err");e.textContent=m;e.hidden=false;e.scrollIntoView({block:"center"})};
+  const start=g("su_start").value,nights=parseInt(g("su_nights").value,10),pd=parseInt(g("su_pd").value,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(start))return err("Pick your first day.");
+  if(!(nights>=1&&nights<=21))return err("Nights should be between 1 and 21.");
+  if(!(pd>=1&&pd<=nights+1))return err("Park days should be between 1 and "+(nights+1)+", one more than your nights.");
+  const hv=g("su_height").value,h=parseInt(hv,10);
+  if(hv&&!(h>=20&&h<=80))return err("Height should be in inches, like 40.");
+  const tv=g("su_travel").value;
+  if(tv&&!(+tv>=5&&+tv<=240))return err("Travel time should be in minutes, between 5 and 240.");
+  trip={start,nights,parkDays:pd,ticket:g("su_ticket").value,ll:g("su_ll").value,stay:g("su_stay").value,
+    stayName:g("su_name").value.trim().slice(0,40),travelMin:tv?+tv:"",height:hv?h:0,thrill:g("su_thrill").value,meets:g("su_meets").checked,
+    hours:(trip&&trip.hours)||{},park:(trip&&trip.park)||{}};
+  store.set("trip",trip);regen();Object.keys(SN).forEach(k=>delete SN[k]);
+  state.day=pickDay();state.seg=0;hideSetup();render();window.scrollTo(0,0);
+}
+
+/* ---------- plan ---------- */
+function pickDay(){
+  const today=nowET().date;
+  let i=DAYS.findIndex(d=>d.date===today&&d.kind==="park");
+  if(i>=0)return i;
+  i=DAYS.findIndex(d=>d.date>today&&d.kind==="park");
+  if(i>=0)return i;
+  i=DAYS.findIndex(d=>d.kind==="park");
+  return i>=0?i:0;
+}
+function tripRange(){
+  const s=DAYS[0].date,e=DAYS[DAYS.length-1].date;
+  return s.slice(0,7)===e.slice(0,7)?monthDay(s)+"–"+dnOf(e):monthDay(s)+" – "+monthDay(e);
+}
+function countdown(){
+  if(!DAYS.length)return "";
+  const today=nowET().date,n=dayNum(DAYS[0].date)-dayNum(today),last=dayNum(DAYS[DAYS.length-1].date)-dayNum(today);
+  if(n>1)return n+" days to go";
+  if(n===1)return "Tomorrow";
+  if(last>=0)return DAYS.some(d=>d.date===today)?"Trip day (Orlando time)":"Between days";
+  return "Trip complete";
+}
+function itemHTML(day,bi,ii,x){
+  const k=day.id+":"+bi+":"+ii;
+  const badge=x.f?'<span class="badge b-'+x.f+'">'+BADGE[x.f]+'</span>':"";
+  const tag=x.tag?'<span class="badge b-call">'+esc(x.tag)+'</span>':"";
+  const nn=stopNums(day)[bi+":"+ii],num=nn?'<span class="snum" title="Map stop '+nn+'">'+nn+'</span>':"";
+  const ico=x.k&&ICON[x.k]?'<span class="ico" aria-hidden="true">'+ICON[x.k]+'</span>':"";
+  const note=x.n?'<p class="note">'+esc(x.n)+'</p>':"";
+  const chipSpan=x.e&&x.e.q?wtSpan(x.pk,x.e.q):"";
+  const rk=x.e&&CK_KINDS.includes(x.e.t)?x.e.id:null;
+  const tx=extra=>'<span class="tx"><span class="ttl">'+num+ico+esc(x.t)+'</span>'+badge+tag+chipSpan+note+(extra||"")+'</span>';
+  if(rk)return '<li class="it ckit">'+tx(ckHTML(rk))+'</li>';
+  return '<li class="it"><label><input type="checkbox" data-k="'+k+'"'+(done[k]?" checked":"")+'>'+tx()+'</label></li>';
+}
+function moreHTML(day){
+  const lab=PARKS[day.pk].label;
+  return '<div class="morebox"><b>Want more to do?</b><p class="note">Every ride, show and meet at '+lab+' is on the Rides tab, with live waits.</p>'
+    +'<div class="btns"><button type="button" class="btn" data-act="gorides">See all at '+lab+'</button></div></div>';
+}
+function dayEditHTML(day){
+  return '<details class="more" data-s="editOpen"'+(state.editOpen?" open":"")+'><summary>Change park or hours for this day</summary>'
+    +'<label class="lbl" for="de_p">Park</label><select class="inp" id="de_p">'+Object.keys(PARKS).map(k=>'<option value="'+k+'"'+(k===day.pk?" selected":"")+'>'+PARKS[k].label+'</option>').join("")+'</select>'
+    +'<label class="lbl" for="de_o">Park opens</label><input class="inp" id="de_o" type="time" value="'+day.open+'">'
+    +'<label class="lbl" for="de_c">Park closes</label><input class="inp" id="de_c" type="time" value="'+day.close+'">'
+    +'<div class="btns" style="margin-bottom:12px"><button type="button" class="btn pri" data-act="dayapply">Apply</button><button type="button" class="btn" data-act="dayreset">Reset this day</button></div></details>';
+}
+function planHTML(){
+  const day=DAYS[state.day],t=nowET(),live=day.date===t.date;
+  let h=dueBanner()+'<h1>'+esc(day.park)+'</h1><p class="sub">'+esc(longDate(day.date))+(day.kind==="park"?". "+esc(day.sub):". "+esc(day.sub))+'</p>';
+  if(day.kind==="park")h+='<p class="hours">Open '+day.hours+'<small>'+day.hoursNote+'</small></p>'+dayEditHTML(day)
+    +'<ul class="heads">'+day.heads.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>'
+    +'<p class="walk" id="walkline"></p>'
+    +'<p class="who">Checking in for <b>'+ppl.map(esc).join(", ")+'</b>. <button type="button" class="linkbtn" data-act="gpeople">Change</button></p>'
+    +'<details class="more" data-s="whyOpen"'+(state.whyOpen?" open":"")+'><summary>Why this order</summary><ul class="whylist">'+day.why.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></details>';
+  h+='<ol class="tl">';
+  day.blocks.forEach((b,bi)=>{
+    const s=mins(b.s),e=mins(b.e);
+    const now=live&&t.mins>=s&&t.mins<e,past=live&&t.mins>=e;
+    h+='<li class="blk'+(now?" now":"")+(past?" past":"")+'"'+(now?' id="now"':"")+'>'
+      +'<div class="when">'+range(b.s,b.e)+(now?'<span class="nowpill">Now</span>':"")+'</div>'
+      +'<h2>'+esc(b.h)+'</h2><ul class="items">'+b.items.map((x,ii)=>itemHTML(day,bi,ii,x)).join("")+'</ul></li>';
+  });
+  h+='</ol>';
+  if(day.kind==="park"){
+    h+=moreHTML(day);
+    if(day.skips.length)h+='<details class="more"><summary>Left out of this plan ('+day.skips.length+')</summary><ul class="altlist">'
+      +day.skips.map(s=>'<li><b>'+esc(s[0])+'</b><p class="note">'+esc(s[1])+'</p></li>').join("")+'</ul></details>';
+  }
+  return h;
+}
+
+/* ---------- rides ---------- */
+const TYPE_LABEL={ride:"Ride",show:"Show",walk:"Walk",meet:"Meet",exp:"Experience"};
+const FILTERS={all:["All",null],ride:["Rides",["ride"]],meet:["Meets",["meet","exp"]],show:["Shows and walks",["show","walk"]]};
+function tripWhy(e){
+  if(e.x)return {closed:e.x};
+  const dates=DAYS.filter(d=>d.kind==="park").map(d=>d.date);
+  if(e.c){const hit=dates.filter(d=>inRange(d,e.c[0],e.c[1])).length;
+    if(hit&&hit===dates.length)return {closed:"Closed on your dates. "+e.c[2]};
+    if(hit)return {closed:"Closed on some of your dates. "+e.c[2]}}
+  const r=whyNot(Object.assign({},e,{c:null,winter:false}),trip,null);
+  return r?{skip:r}:{};
+}
+function catRow(e,plan){
+  const w=tripWhy(e),c=w.closed?null:chip(entryFor(e.p,e.q));
+  const badges=(e.h?'<span class="badge b-h">'+e.h+' in</span>':(e.x?"":'<span class="badge b-h">Any height</span>'))
+    +(plan.has(e.id)?'<span class="badge b-added">On your plan</span>':"")
+    +(w.skip?'<span class="badge b-removed">Skipped for you</span>':"")
+    +(w.closed?'<span class="badge b-removed">Closed</span>':"");
+  const note=[w.closed||w.skip||"",e.d].filter(Boolean).join(" ");
+  return '<li class="wrow"><span><b>'+esc(e.n)+'</b>'+badges+'<small>'+TYPE_LABEL[e.t]+(note?". "+esc(note.trim()):"")+'</small>'+(w.closed||e.x?"":ckHTML(e.id))+'</span>'
+    +(c?'<span class="wt on '+c.c+'">'+c.t+'</span>':"")+'</li>';
+}
+function ridesHTML(){
+  const k=PARKS[state.wp]?state.wp:((DAYS[state.day]&&DAYS[state.day].pk)||"mk");
+  const P=PARKS[k],w=waits[k],cf=state.cf||"all",want=FILTERS[cf][1];
+  let h='<section class="sec"><h1>Rides and meets</h1>'+gdNotice()+'<p>Everything at the park, with live standby waits from ThemeParks.wiki. Tap a name under a ride when that person has done it. Waits are estimates and they move fast. Character lineups rotate, so confirm in My Disney Experience.</p>'
+    +'<div class="seg4">'+Object.keys(PARKS).map(x=>'<button type="button" class="btn" data-act="wpark" data-p="'+x+'" aria-pressed="'+(x===k)+'">'+PARKS[x].label+'</button>').join("")+'</div>'
+    +'<div class="chips">'+Object.keys(FILTERS).map(f=>'<button type="button" class="chipbtn" data-act="cfilter" data-f="'+f+'" aria-pressed="'+(f===cf)+'">'+FILTERS[f][0]+'</button>').join("")+'</div>'
+    +'<div class="btns"><button type="button" class="btn" data-act="wrefresh">Refresh waits</button></div>';
+  if(werr[k])h+='<p class="err">'+werr[k]+(w?" Showing the last numbers from "+clock(w.ts)+".":"")+'</p>';
+  else if(!w)h+='<p class="note">Loading waits...</p>';
+  if(w){const old=Date.now()-w.ts>15*60e3;h+='<p class="stat">'+(old?"These numbers are old. Last updated ":"Waits updated ")+clock(w.ts)+', Orlando time.</p>'}
+  const sum=checkinSummary();if(sum)h+='<p class="stat">Check-ins so far: '+sum+'.</p>';
+  h+='</section>'+peopleHTML();
+  const plan=planIds(),list=CATALOG[k].filter(e=>!want||want.includes(e.t));
+  const isClosed=e=>!!tripWhy(e).closed;
+  const open=list.filter(e=>!isClosed(e)),closed=list.filter(isClosed),lands=[];
+  open.forEach(e=>{let g=lands.find(x=>x.l===e.l);if(!g){g={l:e.l,items:[]};lands.push(g)}g.items.push(e)});
+  lands.forEach(g=>{h+='<section class="sec"><h2>'+esc(g.l)+'</h2><ul class="catlist" style="list-style:none;padding:0;margin:0">'+g.items.map(e=>catRow(e,plan)).join("")+'</ul></section>'});
+  if(closed.length)h+='<section class="sec"><h2>Not available on your dates</h2><ul class="catlist" style="list-style:none;padding:0;margin:0">'+closed.map(e=>catRow(e,plan)).join("")+'</ul></section>';
+  if(!list.length)h+='<p class="note">Nothing in this filter.</p>';
+  return h;
+}
+
+/* ---------- notes ---------- */
+function tripSummary(){
+  const rows=[["Dates",monthDay(DAYS[0].date)+" – "+monthDay(DAYS[DAYS.length-1].date)+", "+trip.nights+" nights, "+trip.parkDays+" park days"],
+    ["Ticket",TICKET_LABEL[trip.ticket]],["Lightning Lane",LL_LABEL[trip.ll]],["Staying",STAY_LABEL[trip.stay]+(trip.stayName?": "+trip.stayName:"")],
+    ["Shortest rider",trip.height?trip.height+" in":"Not set"],["Thrill level",THRILL_LABEL[trip.thrill]],["Character meets",trip.meets?"Included":"Off"]];
+  return '<ul class="rows" style="list-style:none;padding:0;margin:0">'+rows.map(r=>'<li><b>'+r[0]+'</b><span>'+esc(r[1])+'</span></li>').join("")+'</ul>';
+}
+function rulesHTML(){
+  return '<section class="sec"><h2>Park rules</h2><p>Check Disney’s site before you pack.</p>'
+    +'<ul class="rows">'+RULES.map(r=>'<li><b>'+r[0]+'</b><span>'+r[1]+'</span></li>').join("")+'</ul></section>'
+    +'<section class="sec"><h2>Put it on your phone</h2><p>Open the link once with signal. After that the plan works offline. Waits and the group need a connection.</p>'
+    +'<ol class="how"><li><b>iPhone:</b> open the link in Safari, tap Share, then Add to Home Screen.</li>'
+    +'<li><b>Android:</b> open the link in Chrome, tap the menu, then Install app or Add to Home screen.</li></ol>'
+    +'<p class="fine">Check marks on the plan are saved on each phone separately.</p></section>';
+}
+function notesHTML(){
+  return '<section class="sec"><h1>Notes</h1><p>Your reminders and notes come first, and you can edit them. The sections further down are for reference.</p></section>'
+    +remindersHTML()
+    +'<section class="sec"><h2>Your trip</h2>'+tripSummary()+'<div class="btns"><button type="button" class="btn" data-act="setup">Change trip setup</button></div></section>'
+    +'<section class="sec"><h2>Check in My Disney Experience</h2><ul class="rows chk">'
+    +CHECKS.map((x,i)=>'<li><label><input type="checkbox" data-k="chk:'+i+'"'+(done["chk:"+i]?" checked":"")+'><span>'+esc(x)+'</span></label></li>').join("")+'</ul></section>'
+    +rulesHTML()
+    +'<p class="fine">Fan-made, not affiliated with Disney. Disney and attraction names belong to their owners and are used only to describe the parks. Park facts checked '+KNOWLEDGE+'. Heights, closures and hours change, so confirm before you go. Positions marked ≈ are estimated from the park layout. Wait times: ThemeParks.wiki.</p>';
+}
+
+/* ---------- render ---------- */
+function render(){
+  if(!trip||!DAYS.length){showSetup(true);return}
+  if(state.day>=DAYS.length)state.day=0;
+  const day=DAYS[state.day];
+  document.body.className=day.cls;
+  $("#brand").textContent="Disney World, "+tripRange();
+  $("#days").innerHTML=DAYS.map((d,i)=>'<button type="button" class="day-btn '+d.cls+'" data-day="'+i+'" aria-pressed="'+(i===state.day)+'">'
+    +'<span class="dw">'+d.dw+'</span><span class="dn">'+d.dn+'</span><span class="dp">'+esc(d.short)+'</span></button>').join("");
+  const act=document.querySelector(".day-btn[aria-pressed=true]"),box=$("#days");   // keep the chosen day in view
+  if(act&&box.offsetWidth){const r=act.getBoundingClientRect(),bb=box.getBoundingClientRect();box.scrollLeft+=r.left-bb.left-(bb.width-r.width)/2}
+  document.querySelectorAll(".tab").forEach(b=>{if(b.dataset.tab===state.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  $("#days").style.display=state.tab==="plan"||state.tab==="map"?"":"none";
+  if(state.tab!=="map"&&mapObj){mapObj.remove();mapObj=null;mapLayer=null}
+  const view={plan:planHTML,map:mapHTML,rides:ridesHTML,group:groupHTML,notes:notesHTML}[state.tab]||planHTML;
+  $("#view").innerHTML=view();
+  $("#view").insertAdjacentHTML("beforeend",'<p class="sig">Created by Avinash</p>');
+  $("#count").textContent=countdown();
+  paint();
+  if(state.tab==="plan")paintWalk();
+  if(state.tab==="map"){initMap();if(G.code&&gU()&&gK())refreshMembers()}
+  if(state.tab==="group"){renderMembers();refreshMembers()}
+  if(state.tab==="rides"){const k=PARKS[state.wp]?state.wp:day.pk||"mk";if(!waits[k]||Date.now()-waits[k].ts>60e3)refreshWaits()}
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-act]");
+  if(a){
+    const act=a.dataset.act;
+    if(act==="setup")showSetup(false);
+    else if(act==="setupsave")saveSetup();
+    else if(act==="setupcancel")hideSetup();
+    else if(act==="dayapply"){
+      const day=DAYS[state.day],np=$("#de_p").value,o=$("#de_o").value,c=$("#de_c").value;
+      if(!o||!c||mins(c)<=mins(o))return toast("Closing time should be after opening time");
+      trip.park=trip.park||{};trip.hours=trip.hours||{};
+      if(np!==day.pk){trip.park[day.date]=np;delete trip.hours[day.date]}
+      else if(o===PARKS[np].open&&c===PARKS[np].close)delete trip.hours[day.date];
+      else trip.hours[day.date]={open:o,close:c};
+      store.set("trip",trip);regen();Object.keys(SN).forEach(k=>delete SN[k]);state.seg=0;render();toast("Day rebuilt");
+    }
+    else if(act==="dayreset"){
+      const day=DAYS[state.day];trip.park=trip.park||{};trip.hours=trip.hours||{};
+      delete trip.park[day.date];delete trip.hours[day.date];
+      store.set("trip",trip);regen();Object.keys(SN).forEach(k=>delete SN[k]);state.seg=0;render();toast("Day reset");
+    }
+    else if(act==="mseg"){state.seg=+a.dataset.i;render()}
+    else if(act==="wpark"){state.wp=a.dataset.p;render()}
+    else if(act==="wrefresh"){toast("Refreshing");refreshWaits()}
+    else if(act==="cfilter"){state.cf=a.dataset.f;render()}
+    else if(act==="gorides"){state.wp=DAYS[state.day].pk;state.cf="all";state.tab="rides";store.set("tab","rides");render();window.scrollTo(0,0)}
+    else if(act==="radd"){
+      const t=($("#rt").value||"").trim();if(!t)return toast("Type something first");
+      remPut({id:rand(8),t:t.slice(0,200),due:$("#rd").value||"",done:false});render();toast("Added");
+    }
+    else if(act==="redit"){state.editRem=a.dataset.id;render()}
+    else if(act==="rcancel"){state.editRem=null;render()}
+    else if(act==="rsave"){
+      const r=remList().find(x=>x.id===a.dataset.id),t=($("#re_t").value||"").trim();
+      if(!r)return;if(!t)return toast("It can’t be empty");
+      r.t=t.slice(0,200);r.due=$("#re_d").value||"";state.editRem=null;remPut(r);render();
+    }
+    else if(act==="rdel"){gdDel("rem",a.dataset.id);render()}
+    else if(act==="rdone"){const r=remList().find(x=>x.id===a.dataset.id);if(r){r.done=true;remPut(r);render()}}
+    else if(act==="ck"){
+      const key=a.dataset.rk+"~"+a.dataset.p,y=window.scrollY;
+      if(gdGet("ride",key)!==undefined)gdDel("ride",key);else gdSet("ride",key,"1");
+      render();window.scrollTo(0,y);
+    }
+    else if(act==="padd"){const err=addPerson($("#pn").value);if(err)return toast(err);state.pplOpen=true;render();toast("Added")}
+    else if(act==="prem"){const err=removePerson(a.dataset.n);if(err)return toast(err);state.pplOpen=true;render()}
+    else if(act==="gpeople"){state.pplOpen=true;state.wp=DAYS[state.day].pk;state.cf="all";state.tab="rides";store.set("tab","rides");render();window.scrollTo(0,0)}
+    else if(act==="mfit"){const day=DAYS[state.day],st=segStops(day,curSeg(day));if(mapObj&&st.length)mapObj.fitBounds(L.latLngBounds(st.map(s=>[s.lat,s.lng])),{padding:[30,30],maxZoom:17})}
+    else if(act==="mlocate"){
+      if(!navigator.geolocation)return toast("This browser can’t read location");
+      navigator.geolocation.getCurrentPosition(p=>{lastPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};drawMap();if(mapObj)mapObj.setView([lastPos.lat,lastPos.lng],Math.max(mapObj.getZoom(),17))},()=>toast("Location is blocked"),{enableHighAccuracy:true,timeout:15000});
+    }
+    else if(act==="gsql"){navigator.clipboard.writeText(SETUP_SQL_ALL).then(()=>toast("SQL copied"),()=>toast("Couldn’t copy. Open “Show the SQL” and copy it by hand."))}
+    else if(act==="gsave"){
+      const u=($("#gu").value||"").trim().replace(/\/$/,""),k=($("#gk").value||"").trim();
+      if(!okUrl(u))return toast("The URL should look like https://abcd.supabase.co");
+      if(k.length<20||/service_role/i.test(k))return toast("Paste the publishable key, not a secret key");
+      G.u=u;G.k=k;gSave();render();
+    }
+    else if(act==="gstart"){G.code=rand(24);gSave();render();gdSync()}
+    else if(act==="gname"){
+      const n=($("#gn").value||"").replace(/~/g," ").trim().slice(0,24);
+      if(!n)return toast("Enter your name");
+      G.me=n+"~"+rand(3);gSave();syncPeople();gdSync();render();
+    }
+    else if(act==="gshare"){if(watch==null)startShare();else stopShare();render()}
+    else if(act==="gdist"){
+      if(!navigator.geolocation)return toast("This browser can’t read location");
+      navigator.geolocation.getCurrentPosition(p=>{lastPos={lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)};render()},()=>toast("Location is blocked"),{enableHighAccuracy:true,timeout:15000});
+    }
+    else if(act==="ginvite")shareLink("Join our Disney trip group","Open this to see the plan and the group map.",inviteLink());
+    else if(act==="gleave"){
+      if(!confirm("Leave the group? You’ll stop sharing and need a new invite to rejoin."))return;
+      stopShare().then(()=>{G.code=null;G.me=null;rows=[];gSave();render()});
+    }
+    return;
+  }
+  const d=e.target.closest("[data-day]");
+  if(d){state.day=+d.dataset.day;state.seg=0;if(state.tab!=="map")state.tab="plan";render();window.scrollTo(0,0);return}
+  const t=e.target.closest("[data-tab]");
+  if(t){state.tab=t.dataset.tab;store.set("tab",state.tab);render();window.scrollTo(0,0);return}
+});
+document.addEventListener("input",e=>{if(e.target.id==="memo"){memo=e.target.value;store.set("memo",memo)}});
+document.addEventListener("change",e=>{
+  const d=e.target.dataset||{};
+  if(d.r){const r=remList().find(x=>x.id===d.r);if(r){r.done=e.target.checked;remPut(r);render()}return}
+  const k=d.k;
+  if(!k)return;
+  if(e.target.checked)done[k]=1;else delete done[k];
+  store.set("pdone",done);
+});
+document.addEventListener("toggle",e=>{const k=e.target.dataset&&e.target.dataset.s;if(k)state[k]=e.target.open},true);
+$("#share").addEventListener("click",()=>shareLink("Disney World trip plan","Our Disney World plan. Open it to see the same itinerary.",tripLink()));
+$("#setupbtn").addEventListener("click",()=>showSetup(!trip));
+
+/* ---------- start ---------- */
+(function joinFromLink(){
+  if(!location.hash)return;
+  const p=new URLSearchParams(location.hash.slice(1)),g=p.get("g"),tj=p.get("t");
+  let used=false;
+  if(tj&&!trip){   // adopt the host's trip only on a phone that hasn't set one up
+    try{const ct=cleanTrip(JSON.parse(tj));if(ct){trip=ct;store.set("trip",trip);used=true}}catch(e){}
+  }
+  if(g&&/^[a-z0-9]{20,64}$/i.test(g)){
+    if(G.code&&G.code!==g){G.me=null;G.share=false}
+    G.code=g;
+    const uu=p.get("u"),k=p.get("k");
+    if(okUrl(uu))G.u=uu.replace(/\/$/,"");        // only *.supabase.co is accepted
+    if(k&&/^[\w.\-]{20,600}$/.test(k)&&!/service_role/i.test(k))G.k=k;
+    gSave();state.tab="group";used=true;
+  }
+  if(used||g||tj)history.replaceState(null,"",location.pathname+location.search);
+})();
+regen();
+state.day=pickDay();
+render();
+const nowEl=$("#now");
+if(nowEl&&state.tab==="plan")nowEl.scrollIntoView({block:"center"});
+refreshWaits();
+if(grouped()){syncPeople();gdSync()}
+if(G.share&&G.code&&G.me&&gU()&&gK())startShare();
+setInterval(()=>{
+  if(document.hidden||!trip)return;
+  if(state.tab==="plan"){
+    const open=document.activeElement&&(document.activeElement.tagName==="INPUT"||document.activeElement.tagName==="SELECT");
+    if(!open){const y=window.scrollY;render();window.scrollTo(0,y)}
+  }
+},60000);
+setInterval(()=>{if(!document.hidden&&trip&&(state.tab==="rides"||state.tab==="plan"))refreshWaits()},120000);
+setInterval(()=>{if(!document.hidden&&(state.tab==="group"||(state.tab==="map"&&G.code&&gU()&&gK())))refreshMembers()},15000);
+setInterval(()=>{if(!document.hidden)gdSync()},15000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){gdSync();const k=DAYS[state.day]&&DAYS[state.day].pk;if(k&&(!waits[k]||Date.now()-waits[k].ts>60e3))refreshWaits()}});
+if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0)navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+</script>
+</body>
+</html>
